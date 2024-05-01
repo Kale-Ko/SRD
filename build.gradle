@@ -1,0 +1,131 @@
+plugins {
+    id "java"
+}
+
+project.group = "io.github.kale_ko"
+project.version = project.project_version
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_version)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
+jar {
+    manifest {
+        attributes "Name": "io/github/kale_ko/srd/",
+                "Specification-Title": "EJCL",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "Kale-Ko",
+                "Implementation-Title": "io.github.kale_ko.srd",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Kale-Ko",
+                "Sealed": true
+    }
+}
+
+tasks.register("clientJar", Jar) {
+    archiveClassifier = "client"
+    manifest {
+        attributes "Name": "io/github/kale_ko/srd/",
+                "Main-Class": "io.github.kale_ko.srd.ClientMain",
+                "Specification-Title": "EJCL",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "Kale-Ko",
+                "Implementation-Title": "io.github.kale_ko.srd",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Kale-Ko",
+                "Sealed": true
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.output)
+    from(configurations.runtimeClasspath.collect {
+        it.isDirectory() ? null : zipTree(it)
+    })
+}
+
+tasks.register("serverJar", Jar) {
+    dependsOn tasks.compileNatives
+
+    archiveClassifier = "server"
+    manifest {
+        attributes "Name": "io/github/kale_ko/srd/",
+                "Main-Class": "io.github.kale_ko.srd.ServerMain",
+                "Specification-Title": "EJCL",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "Kale-Ko",
+                "Implementation-Title": "io.github.kale_ko.srd",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Kale-Ko",
+                "Sealed": true
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.output)
+    from(tasks.compileNatives.outputs.files)
+    from(configurations.runtimeClasspath.collect {
+        it.isDirectory() ? null : zipTree(it)
+    })
+}
+
+import java.nio.file.Files
+import java.nio.file.Path
+
+tasks.register("compileNativeLinux", Exec) {
+    Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/")
+    Path outPath = Path.of("build/natives")
+
+    doFirst {
+        Files.createDirectories(outPath)
+    }
+
+    executable "x86_64-linux-gnu-g++"
+    args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux.so").toString(), "-std=c++20", "-shared", "-I", "/usr/include", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib", "-l", "X11"
+    workingDir project.rootDir
+
+    inputs.files("src/main/native/desktopCapture-linux.cpp")
+    outputs.files(outPath.resolve("libDesktopCapture-linux.so"))
+}
+
+tasks.register("compileNativeWindows", Exec) {
+    Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/")
+    Path outPath = Path.of("build/natives/")
+
+    doFirst {
+        Files.createDirectories(outPath)
+    }
+
+    executable "x86_64-w64-mingw32-g++"
+    args "src/main/native/desktopCapture-windows.cpp", "-o", outPath.resolve("libDesktopCapture-windows.dll").toString(), "-std=c++20", "-shared", /*"-I", TODO */ "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString()
+    /*, "-L", TODO */
+    workingDir project.rootDir
+
+    inputs.files("src/main/native/desktopCapture-windows.cpp")
+    outputs.files(outPath.resolve("libDesktopCapture-windows.dll"))
+}
+
+tasks.register("compileNatives") {
+    dependsOn tasks.compileNativeLinux
+    dependsOn tasks.compileNativeWindows
+
+    outputs.files(tasks.compileNativeLinux.outputs.files)
+    outputs.files(tasks.compileNativeWindows.outputs.files)
+}
+
+build {
+    finalizedBy tasks.clientJar
+    finalizedBy tasks.serverJar
+}
