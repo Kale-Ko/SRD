@@ -54,6 +54,16 @@ int decrRefCount(JNIEnv* env, jobject self) {
     return value - 1;
 }
 
+struct DisplayStruct {
+    Display* display;
+};
+
+struct ScreenStruct {
+    int number;
+    Screen* screen;
+    Window rootWindow;
+};
+
 /*
  * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
  * Method:    connectDisplay
@@ -65,7 +75,10 @@ JNIEXPORT jlong JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_connectDi
     }
 
     Display* display = XOpenDisplay(NULL);
-    return (jlong)display;
+
+    DisplayStruct* displayStruct = new DisplayStruct;
+    displayStruct->display = display;
+    return (jlong)displayStruct;
 }
 
 /*
@@ -74,8 +87,11 @@ JNIEXPORT jlong JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_connectDi
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_disconnectDisplay(JNIEnv* env, jobject self, jlong displayHandle) {
-    Display* display = (Display*)displayHandle;
-    XCloseDisplay(display);
+    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
+
+    XCloseDisplay(displayStruct->display);
+
+    delete displayStruct;
 
     if (decrRefCount(env, self) == 0) {
         XFreeThreads();
@@ -88,12 +104,16 @@ JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_disconnect
  * Signature: (J)[J
  */
 JNIEXPORT jlongArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_getScreens(JNIEnv* env, jobject self, jlong displayHandle) {
-    Display* display = (Display*)displayHandle;
-    int screensCount = XScreenCount(display);
+    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
 
+    int screensCount = XScreenCount(displayStruct->display);
     jlong* screens = new jlong[screensCount];
     for (int i = 0; i < screensCount; i++) {
-        screens[i] = (jlong)XScreenOfDisplay(display, i);
+        ScreenStruct* screenStruct = new ScreenStruct;
+        screenStruct->number = i;
+        screenStruct->screen = XScreenOfDisplay(displayStruct->display, i);
+        screenStruct->rootWindow = XRootWindowOfScreen(screenStruct->screen);
+        screens[i] = (jlong)screenStruct;
     }
 
     jlongArray jScreens = env->NewLongArray(screensCount);
@@ -108,11 +128,12 @@ JNIEXPORT jlongArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_getS
  * Signature: (J)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_captureScreen__J(JNIEnv* env, jobject self, jlong displayHandle) {
-    Display* display = (Display*)displayHandle;
-    Screen* screen = XDefaultScreenOfDisplay(display);
+    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
+
+    Screen* screen = XDefaultScreenOfDisplay(displayStruct->display);
     Window screenWindow = XRootWindowOfScreen(screen);
 
-    XImage* image = XGetImage(display, screenWindow, 0, 0, screen->width, screen->height, AllPlanes, ZPixmap);
+    XImage* image = XGetImage(displayStruct->display, screenWindow, 0, 0, screen->width, screen->height, AllPlanes, ZPixmap);
 
     int bufferSize = image->width * image->height * (image->bits_per_pixel / 8);
     jbyte* buffer = new jbyte[bufferSize];
@@ -125,7 +146,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
             buffer[i + 2] = image->data[i];
             buffer[i + 3] = image->data[i + 3];
         }
-
         break;
     case 24:
         for (int i = 0; i < bufferSize; i += 3) {
@@ -134,7 +154,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
             buffer[i + 2] = image->data[i];
             buffer[i + 3] = 0;
         }
-
         break;
     default:
         return NULL;
@@ -151,11 +170,10 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
  * Signature: (JJ)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_captureScreen__JJ(JNIEnv* env, jobject self, jlong displayHandle, jlong screenHandle) {
-    Display* display = (Display*)displayHandle;
-    Screen* screen = (Screen*)screenHandle;
-    Window screenWindow = XRootWindowOfScreen(screen);
+    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
+    ScreenStruct* screenStruct = (ScreenStruct*)screenHandle;
 
-    XImage* image = XGetImage(display, screenWindow, 0, 0, screen->width, screen->height, AllPlanes, ZPixmap);
+    XImage* image = XGetImage(displayStruct->display, screenStruct->rootWindow, 0, 0, screenStruct->screen->width, screenStruct->screen->height, AllPlanes, ZPixmap);
 
     int bufferSize = image->width * image->height * (image->bits_per_pixel / 8);
     jbyte* buffer = new jbyte[bufferSize];
@@ -168,7 +186,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
             buffer[i + 2] = image->data[i];
             buffer[i + 3] = image->data[i + 3];
         }
-
         break;
     case 24:
         for (int i = 0; i < bufferSize; i += 3) {
@@ -177,7 +194,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
             buffer[i + 2] = image->data[i];
             buffer[i + 3] = 0;
         }
-
         break;
     default:
         return NULL;
