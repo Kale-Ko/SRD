@@ -181,6 +181,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
 
     jbyteArray array = env->NewByteArray(bufferSize);
     env->SetByteArrayRegion(array, 0, bufferSize, buffer);
+    delete buffer;
     return array;
 }
 
@@ -221,5 +222,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_capt
 
     jbyteArray array = env->NewByteArray(bufferSize);
     env->SetByteArrayRegion(array, 0, bufferSize, buffer);
+    delete buffer;
     return array;
 }
