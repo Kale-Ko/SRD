@@ -56,6 +56,9 @@ int decrRefCount(JNIEnv* env, jobject self) {
 
 struct DisplayStruct {
     Display* display;
+
+    jint screensCount;
+    jlong* screensCache;
 };
 
 struct ScreenStruct {
@@ -78,6 +81,8 @@ JNIEXPORT jlong JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_connectDi
 
     DisplayStruct* displayStruct = new DisplayStruct;
     displayStruct->display = display;
+    displayStruct->screensCount = -1;
+    displayStruct->screensCache = NULL;
     return (jlong)displayStruct;
 }
 
@@ -91,6 +96,12 @@ JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_disconnect
 
     XCloseDisplay(displayStruct->display);
 
+    if (displayStruct->screensCache != NULL) {
+        for (int i = 0; i < displayStruct->screensCount; i++) {
+            delete (ScreenStruct*)displayStruct->screensCache[i];
+        }
+        delete displayStruct->screensCache;
+    }
     delete displayStruct;
 
     if (decrRefCount(env, self) == 0) {
@@ -106,19 +117,28 @@ JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_disconnect
 JNIEXPORT jlongArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_getScreens(JNIEnv* env, jobject self, jlong displayHandle) {
     DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
 
-    int screensCount = XScreenCount(displayStruct->display);
-    jlong* screens = new jlong[screensCount];
-    for (int i = 0; i < screensCount; i++) {
-        ScreenStruct* screenStruct = new ScreenStruct;
-        screenStruct->number = i;
-        screenStruct->screen = XScreenOfDisplay(displayStruct->display, i);
-        screenStruct->rootWindow = XRootWindowOfScreen(screenStruct->screen);
-        screens[i] = (jlong)screenStruct;
+    int screensCount;
+    jlong* screens;
+
+    if (displayStruct->screensCache == NULL) {
+        screensCount = XScreenCount(displayStruct->display);
+        screens = new jlong[screensCount];
+
+        for (int i = 0; i < screensCount; i++) {
+            ScreenStruct* screenStruct = new ScreenStruct;
+            screenStruct->number = i;
+            screenStruct->screen = XScreenOfDisplay(displayStruct->display, i);
+            screenStruct->rootWindow = XRootWindowOfScreen(screenStruct->screen);
+            screens[i] = (jlong)screenStruct;
+        }
+    }
+    else {
+        screensCount = displayStruct->screensCount;
+        screens = displayStruct->screensCache;
     }
 
     jlongArray jScreens = env->NewLongArray(screensCount);
     env->SetLongArrayRegion(jScreens, 0, screensCount, screens);
-    delete screens;
     return jScreens;
 }
 
