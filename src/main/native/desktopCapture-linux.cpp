@@ -131,6 +131,9 @@ JNIEXPORT jlongArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_getS
             screenStruct->rootWindow = XRootWindowOfScreen(screenStruct->screen);
             screens[i] = (jlong)screenStruct;
         }
+
+        displayStruct->screensCount = screensCount;
+        displayStruct->screensCache = screens;
     }
     else {
         screensCount = displayStruct->screensCount;
