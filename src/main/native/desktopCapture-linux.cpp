@@ -1,230 +1,146 @@
-#include <jni.h>
-#include "desktopCapture.h"
+#include "desktopCapture-common.cpp"
+
+#include "io_github_kale_ko_srd_cpp_DesktopCapture.h"
+#include "io_github_kale_ko_srd_cpp_DesktopCapture_Screen.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/Xrandr.h>
 
-inline jfieldID getFieldId(JNIEnv* env, jobject object, const char* field, const char* signature) {
-    jclass clazz = env->GetObjectClass(object);
-    jfieldID feildId = env->GetFieldID(clazz, field, signature);
-    env->DeleteLocalRef(clazz);
-    return feildId;
-}
-
-inline jfieldID getStaticFieldId(JNIEnv* env, jclass clazz, const char* field, const char* signature) {
-    jfieldID feildId = env->GetStaticFieldID(clazz, field, signature);
-    return feildId;
-}
-
-inline jmethodID getMethodId(JNIEnv* env, jobject object, const char* method, const char* signature) {
-    jclass clazz = env->GetObjectClass(object);
-    jmethodID methodId = env->GetMethodID(clazz, method, signature);
-    env->DeleteLocalRef(clazz);
-    return methodId;
-}
-
-inline jmethodID getStaticMethodId(JNIEnv* env, jclass clazz, const char* method, const char* signature) {
-    jmethodID methodId = env->GetStaticMethodID(clazz, method, signature);
-    return methodId;
-}
-
-int getRefCount(JNIEnv* env, jobject self) {
-    jclass clazz = env->GetObjectClass(self);
-    jfieldID fieldId = getStaticFieldId(env, clazz, "refCount", "I");
-    jint value = env->GetStaticIntField(clazz, fieldId);
-    env->DeleteLocalRef(clazz);
-    return value;
-}
-
-int incrRefCount(JNIEnv* env, jobject self) {
-    jclass clazz = env->GetObjectClass(self);
-    jfieldID fieldId = getStaticFieldId(env, clazz, "refCount", "I");
-    jint value = env->GetStaticIntField(clazz, fieldId);
-    env->SetStaticIntField(clazz, fieldId, value + 1);
-    env->DeleteLocalRef(clazz);
-    return value;
-}
-
-int decrRefCount(JNIEnv* env, jobject self) {
-    jclass clazz = env->GetObjectClass(self);
-    jfieldID fieldId = getStaticFieldId(env, clazz, "refCount", "I");
-    jint value = env->GetStaticIntField(clazz, fieldId);
-    env->SetStaticIntField(clazz, fieldId, value - 1);
-    env->DeleteLocalRef(clazz);
-    return value - 1;
-}
-
-struct DisplayStruct {
-    Display* display;
-
-    jint screensCount;
-    jlong* screensCache;
-};
-
-struct ScreenStruct {
-    int number;
-    Screen* screen;
-    Window rootWindow;
-};
+#include <vector>
 
 /*
  * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
- * Method:    connectDisplay
- * Signature: ()J
+ * Method:    create
+ * Signature: ()Lio/github/kale_ko/srd/cpp/DesktopCapture;
  */
-JNIEXPORT jlong JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_connectDisplay(JNIEnv* env, jobject self) {
-    if (incrRefCount(env, self) == 0) {
-        XInitThreads();
-    }
-
+JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1create(JNIEnv* env, jclass selfClazz) {
     Display* display = XOpenDisplay(NULL);
-
-    DisplayStruct* displayStruct = new DisplayStruct;
-    displayStruct->display = display;
-    displayStruct->screensCount = -1;
-    displayStruct->screensCache = NULL;
-    return (jlong)displayStruct;
-}
-
-/*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
- * Method:    disconnectDisplay
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_disconnectDisplay(JNIEnv* env, jobject self, jlong displayHandle) {
-    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
-
-    XCloseDisplay(displayStruct->display);
-
-    if (displayStruct->screensCache != NULL) {
-        for (int i = 0; i < displayStruct->screensCount; i++) {
-            delete (ScreenStruct*)displayStruct->screensCache[i];
-        }
-        delete displayStruct->screensCache;
-    }
-    delete displayStruct;
-
-    if (decrRefCount(env, self) == 0) {
-        XFreeThreads();
-    }
-}
-
-/*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
- * Method:    getScreens
- * Signature: (J)[J
- */
-JNIEXPORT jlongArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_getScreens(JNIEnv* env, jobject self, jlong displayHandle) {
-    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
-
-    int screensCount;
-    jlong* screens;
-
-    if (displayStruct->screensCache == NULL) {
-        screensCount = XScreenCount(displayStruct->display);
-        screens = new jlong[screensCount];
-
-        for (int i = 0; i < screensCount; i++) {
-            ScreenStruct* screenStruct = new ScreenStruct;
-            screenStruct->number = i;
-            screenStruct->screen = XScreenOfDisplay(displayStruct->display, i);
-            screenStruct->rootWindow = XRootWindowOfScreen(screenStruct->screen);
-            screens[i] = (jlong)screenStruct;
-        }
-
-        displayStruct->screensCount = screensCount;
-        displayStruct->screensCache = screens;
-    }
-    else {
-        screensCount = displayStruct->screensCount;
-        screens = displayStruct->screensCache;
-    }
-
-    jlongArray jScreens = env->NewLongArray(screensCount);
-    env->SetLongArrayRegion(jScreens, 0, screensCount, screens);
-    return jScreens;
-}
-
-/*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
- * Method:    captureScreen
- * Signature: (J)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_captureScreen__J(JNIEnv* env, jobject self, jlong displayHandle) {
-    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
-
-    Screen* screen = XDefaultScreenOfDisplay(displayStruct->display);
-    Window screenWindow = XRootWindowOfScreen(screen);
-
-    XImage* image = XGetImage(displayStruct->display, screenWindow, 0, 0, screen->width, screen->height, AllPlanes, ZPixmap);
-
-    int bufferSize = image->width * image->height * (image->bits_per_pixel / 8);
-    jbyte* buffer = new jbyte[bufferSize];
-
-    switch (image->bits_per_pixel) {
-    case 32:
-        for (int i = 0; i < bufferSize; i += 4) {
-            buffer[i] = image->data[i + 2];
-            buffer[i + 1] = image->data[i + 1];
-            buffer[i + 2] = image->data[i];
-            buffer[i + 3] = image->data[i + 3];
-        }
-        break;
-    case 24:
-        for (int i = 0; i < bufferSize; i += 3) {
-            buffer[i] = image->data[i + 2];
-            buffer[i + 1] = image->data[i + 1];
-            buffer[i + 2] = image->data[i];
-            buffer[i + 3] = 0;
-        }
-        break;
-    default:
+    if (display == NULL) {
+        throwException(env, "Failed to open X11 display.");
         return NULL;
     }
 
-    jbyteArray array = env->NewByteArray(bufferSize);
-    env->SetByteArrayRegion(array, 0, bufferSize, buffer);
-    delete buffer;
-    return array;
+    char* displayName = XDisplayString(display);
+    if (displayName == NULL) {
+        throwException(env, "Failed to fetch display name.");
+        return NULL;
+    }
+
+    jstring displayNameObj = env->NewStringUTF(displayName);
+    jobject object = env->NewObject(selfClazz, getConstructorId(env, selfClazz, "<init>", "(JLjava/lang/String;)V"), (jlong)display, displayNameObj);
+    env->DeleteLocalRef(displayNameObj);
+    return object;
 }
 
 /*
  * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
- * Method:    captureScreen
- * Signature: (JJ)[B
+ * Method:    destroy
+ * Signature: ()V
  */
-JNIEXPORT jbyteArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_captureScreen__JJ(JNIEnv* env, jobject self, jlong displayHandle, jlong screenHandle) {
-    DisplayStruct* displayStruct = (DisplayStruct*)displayHandle;
-    ScreenStruct* screenStruct = (ScreenStruct*)screenHandle;
+JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1close(JNIEnv* env, jobject self) {
+    Display* display = (Display*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
 
-    XImage* image = XGetImage(displayStruct->display, screenStruct->rootWindow, 0, 0, screenStruct->screen->width, screenStruct->screen->height, AllPlanes, ZPixmap);
+    XCloseDisplay(display);
+}
 
-    int bufferSize = image->width * image->height * (image->bits_per_pixel / 8);
-    jbyte* buffer = new jbyte[bufferSize];
+/*
+ * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
+ * Method:    n_getScreens
+ * Signature: ()[Lio/github/kale_ko/srd/cpp/DesktopCapture/Screen;
+ */
+JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1getScreens(JNIEnv* env, jobject self) {
+    Display* display = (Display*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
 
-    switch (image->bits_per_pixel) {
-    case 32:
-        for (int i = 0; i < bufferSize; i += 4) {
-            buffer[i] = image->data[i + 2];
-            buffer[i + 1] = image->data[i + 1];
-            buffer[i + 2] = image->data[i];
-            buffer[i + 3] = image->data[i + 3];
+    std::vector<jobject> screens;
+    jclass screenClazz = env->FindClass("io/github/kale_ko/srd/cpp/DesktopCapture$Screen");
+
+    int xScreenCount = XScreenCount(display);
+    for (int i = 0; i < xScreenCount; i++) {
+        Screen* xScreen = XScreenOfDisplay(display, i);
+        Window xWindow = XRootWindowOfScreen(xScreen);
+
+        XRRScreenResources* xScreenResources = XRRGetScreenResources(display, xWindow);
+
+        for (int j = 0; j < xScreenResources->noutput; j++) {
+            XRROutputInfo* xOutputInfo = XRRGetOutputInfo(display, xScreenResources, xScreenResources->outputs[j]);
+
+            bool isPrimary = XRRGetOutputPrimary(display, xWindow) == xScreenResources->outputs[j];
+
+            if (xOutputInfo->connection == RR_Connected && xOutputInfo->crtc > 0) {
+                XRRCrtcInfo* xCrtcInfo = XRRGetCrtcInfo(display, xScreenResources, xOutputInfo->crtc);
+
+                jstring screenNameObj = env->NewStringUTF(xOutputInfo->name);
+                jobject screenObj = env->NewObject(screenClazz, getConstructorId(env, screenClazz, "<init>", "(Lio/github/kale_ko/srd/cpp/DesktopCapture;JLjava/lang/String;IIIIZ)V"), self, (jlong)xScreen, screenNameObj, xCrtcInfo->x, xCrtcInfo->y, xCrtcInfo->width, xCrtcInfo->height, isPrimary);
+                env->DeleteLocalRef(screenNameObj);
+                screens.push_back(screenObj);
+
+                XRRFreeCrtcInfo(xCrtcInfo);
+            }
+
+            XRRFreeOutputInfo(xOutputInfo);
+        }
+
+        XRRFreeScreenResources(xScreenResources);
+    }
+
+    jobjectArray screensArray = env->NewObjectArray(screens.size(), screenClazz, NULL);
+    for (int i = 0; i < screens.size(); i++) {
+        env->SetObjectArrayElement(screensArray, i, screens[i]);
+    }
+    env->DeleteLocalRef(screenClazz);
+    return screensArray;
+}
+
+/*
+ * Class:     io_github_kale_ko_srd_cpp_DesktopCapture_Screen
+ * Method:    n_capture
+ * Signature: ()Lio/github/kale_ko/srd/cpp/DesktopCapture/Screen/ScreenCapture;
+ */
+JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Screen_n_1capture(JNIEnv* env, jobject self) {
+    jobject desktopObj = env->GetObjectField(self, getFieldId(env, self, "desktop", "Lio/github/kale_ko/srd/cpp/DesktopCapture;"));
+    Display* display = (Display*)env->GetLongField(desktopObj, getFieldId(env, desktopObj, "handle", "J"));
+    Screen* screen = (Screen*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
+    Window window = XRootWindowOfScreen(screen);
+
+    jint x = env->GetIntField(self, getFieldId(env, self, "x", "I"));
+    jint y = env->GetIntField(self, getFieldId(env, self, "y", "I"));
+    jint width = env->GetIntField(self, getFieldId(env, self, "width", "I"));
+    jint height = env->GetIntField(self, getFieldId(env, self, "height", "I"));
+
+    XImage* image = XGetImage(display, window, x, y, width, height, AllPlanes, ZPixmap);
+    jint imageSize = image->width * image->height * (image->bits_per_pixel / 8);
+
+    jint dataSize = image->width * image->height * 4;
+    jbyte* data = new jbyte[dataSize];
+    switch ((image->bits_per_pixel / 8)) {
+    case 4:
+        for (int i = 0; i < imageSize; i += 4) {
+            data[i] = image->data[i + 2];
+            data[i + 1] = image->data[i + 1];
+            data[i + 2] = image->data[i];
+            data[i + 3] = image->data[i + 3];
         }
         break;
-    case 24:
-        for (int i = 0; i < bufferSize; i += 3) {
-            buffer[i] = image->data[i + 2];
-            buffer[i + 1] = image->data[i + 1];
-            buffer[i + 2] = image->data[i];
-            buffer[i + 3] = 0;
+    case 3:
+        for (int i = 0, j = 0; i < imageSize; i += 3, j += 4) {
+            data[j] = image->data[i + 2];
+            data[j + 1] = image->data[i + 1];
+            data[j + 2] = image->data[i];
+            data[j + 3] = 0;
         }
         break;
     default:
-        return NULL;
+        throwException(env, "X11 returned invalid image bit-depth!");
     }
 
-    jbyteArray array = env->NewByteArray(bufferSize);
-    env->SetByteArrayRegion(array, 0, bufferSize, buffer);
-    delete buffer;
-    return array;
+    XFree(image);
+
+    jbyteArray dataObj = env->NewByteArray(dataSize);
+    env->SetByteArrayRegion(dataObj, 0, dataSize, data);
+
+    jclass captureClazz = env->FindClass("io/github/kale_ko/srd/cpp/DesktopCapture$Capture");
+    jobject captureObj = env->NewObject(captureClazz, getConstructorId(env, captureClazz, "<init>", "(II[B)V"), width, height, dataObj);
+    env->DeleteLocalRef(captureClazz);
+    return captureObj;
 }
