@@ -6,16 +6,23 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
-public class DesktopCapture {
+public class DesktopCapture implements AutoCloseable {
     static {
         try {
-            String libraryName = System.getProperty("os.name").toLowerCase().startsWith("win") ? "libDesktopCapture-windows.dll" : "libDesktopCapture-linux.so";
+            boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("win");
+
+            String libraryName = isWindows ? "libDesktopCapture-windows.dll" : "libDesktopCapture-linux.so";
 
             Path jarFile = new File(DesktopCapture.class.getProtectionDomain().getCodeSource().getLocation().getPath()).toPath();
-            Path libraryFile = Files.createTempFile("srd-", System.getProperty("os.name").toLowerCase().startsWith("win") ? ".dll" : ".so"); // Windows requires .dll file extension, might as well add linux .so
+            Path libraryFile = Files.createTempFile("srd-", isWindows ? ".dll" : ".so"); // Windows requires .dll file extension, might as well add linux .so
 
             if (!Files.isDirectory(jarFile)) {
                 try (JarInputStream inputStream = new JarInputStream(new BufferedInputStream(Files.newInputStream(jarFile)))) {
@@ -38,19 +45,156 @@ public class DesktopCapture {
 
             System.load(libraryFile.toRealPath().toString());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load native library", e);
+            throw new RuntimeException("Failed to load native library.", e);
         }
     }
 
-    protected static int refCount = 0;
+    public static record Capture(int width, int height, byte[] data) {
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName() + "{width=" + width + ", height=" + height + ", data=" + data + "}";
+        }
+    }
 
-    public native long connectDisplay();
+    public class Screen {
+        protected final @NotNull DesktopCapture desktop = DesktopCapture.this;
 
-    public native void disconnectDisplay(long displayHandle);
+        private final long handle;
 
-    public native long[] getScreens(long displayHandle);
+        protected final @NotNull String name;
 
-    public native byte[] captureScreen(long displayHandle);
+        protected final int x;
+        protected final int y;
 
-    public native byte[] captureScreen(long displayHandle, long screenHandle);
+        protected final int width;
+        protected final int height;
+
+        protected final boolean primary;
+
+        private Screen(long handle, @NotNull String name, int x, int y, int width, int height, boolean primary) {
+            this.handle = handle;
+
+            this.name = name;
+
+            this.x = x;
+            this.y = y;
+
+            this.width = width;
+            this.height = height;
+
+            this.primary = primary;
+        }
+
+        public @NotNull String getName() {
+            return this.name;
+        }
+
+        public int getX() {
+            return this.x;
+        }
+
+        public int getY() {
+            return this.y;
+        }
+
+        public int getWidth() {
+            return this.width;
+        }
+
+        public int getHeight() {
+            return this.height;
+        }
+
+        public boolean isPrimary() {
+            return this.primary;
+        }
+
+        public boolean isClosed() {
+            return desktop.closed;
+        }
+
+        public @NotNull Capture capture() {
+            if (desktop.closed) {
+                throw new RuntimeException(desktop.getClass().getSimpleName() + " is closed.");
+            }
+
+            return this.n_capture();
+        }
+
+        private native Capture n_capture();
+
+        @Override
+        public @NotNull String toString() {
+            return this.getClass().getSimpleName() + "{handle=" + this.handle + ", name='" + this.name + "', x=" + this.x + ", y=" + this.y + ", width=" + this.width + ", height=" + this.height + ", primary=" + this.primary + ", closed=" + desktop.closed + "}";
+        }
+    }
+
+    private final long handle;
+
+    protected final @NotNull String name;
+
+    protected boolean closed = false;
+    private List<Screen> screens = null;
+
+    private DesktopCapture(long handle, @NotNull String name) {
+        this.handle = handle;
+
+        this.name = name;
+    }
+
+    public @NotNull String getName() {
+        return this.name;
+    }
+
+    public @NotNull Screen getDefaultScreen() {
+        if (this.closed) {
+            throw new RuntimeException(this.getClass().getSimpleName() + " is closed.");
+        }
+
+        return this.getScreens().get(0);
+    }
+
+    public @NotNull @Unmodifiable List<Screen> getScreens() {
+        if (this.closed) {
+            throw new RuntimeException(this.getClass().getSimpleName() + " is closed.");
+        }
+
+        if (this.screens == null) {
+            Screen[] n_screens = this.n_getScreens();
+
+            this.screens = new ArrayList<>(List.of(n_screens));
+            this.screens.sort((a, b) -> (a.isPrimary() ? -1 : 1) + (b.isPrimary() ? 1 : -1));
+        }
+
+        return Collections.unmodifiableList(this.screens);
+    }
+
+    private native Screen[] n_getScreens();
+
+    public boolean isClosed() {
+        return this.closed;
+    }
+
+    @Override
+    public void close() {
+        if (this.closed) {
+            throw new RuntimeException(this.getClass().getSimpleName() + " is already closed.");
+        }
+        this.closed = true;
+
+        this.n_close();
+    }
+
+    private native void n_close();
+
+    @Override
+    public @NotNull String toString() {
+        return this.getClass().getSimpleName() + "{handle=" + this.handle + ", name='" + this.name + "', closed=" + this.closed + "}";
+    }
+
+    public static @NotNull DesktopCapture create() {
+        return DesktopCapture.n_create();
+    }
+
+    private static native DesktopCapture n_create();
 }
