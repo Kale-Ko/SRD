@@ -16,11 +16,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup JDK
+      - name: Download Custom JDK
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=linux&architecture=${{ runner.arch }}&image_type=jdk" -o javaLinux.json
+          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=${{ runner.arch }}&image_type=jdk" -o javaWindows.json
+          javaLinuxUrl=$(cat javaLinux.json | jq --raw-output ".[0].binary.package.link")
+          javaWindowsVersion=$(cat javaWindows.json | jq --raw-output ".[0].release_name")
+          javaWindowsUrl=$(cat javaWindows.json | jq --raw-output ".[0].binary.package.link")
+          curl -sL $javaLinuxUrl -o javaLinux.tar.gz
+          curl -sL $javaWindowsUrl -o javaWindows.zip
+          mkdir -p java/linux/ && tar -xf javaLinux.tar.gz -C java/linux --strip-components 1
+          mkdir -p java/windows/ && ln --symbolic . java/windows/$javaWindowsVersion && unzip -qx javaWindows.zip -d java/windows/
+          cp -r java/windows/include/win32 java/linux/include/win32
+          cd java/linux/ && tar -cf ${{ runner.temp }}/javaCombined.tar.gz * && cd ../../
+
+      - name: Install JDK
         uses: actions/setup-java@v4
         with:
+          distribution: jdkfile
+          jdkFile: ${{ runner.temp }}/javaCombined.tar.gz
           java-version: 21
-          distribution: temurin
+          architecture: ${{ runner.arch }}
 
       - name: Setup C++ Dependencies
         run: sudo apt-get install -y gcc g++ gcc-mingw-w64 g++-mingw-w64 libx11-dev libxrandr-dev
