@@ -109,7 +109,7 @@ tasks.register("compileNativeWindows", Exec) {
     }
 
     executable "x86_64-w64-mingw32-g++"
-    args "src/main/native/desktopCapture-windows.cpp", "-o", outPath.resolve("libDesktopCapture-windows.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-I", project.rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/"
+    args "src/main/native/desktopCapture-windows.cpp", "-o", outPath.resolve("libDesktopCapture-windows.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-I", project.rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/", "-l", "gdi32"
     workingDir project.rootDir
 
     inputs.files("src/main/native/desktopCapture-windows.cpp")
