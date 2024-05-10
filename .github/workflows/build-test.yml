@@ -19,8 +19,8 @@ jobs:
       - name: Download Custom JDK
         working-directory: ${{ runner.temp }}
         run: |
-          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=linux&architecture=${{ runner.arch }}&image_type=jdk" -o javaLinux.json
-          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=${{ runner.arch }}&image_type=jdk" -o javaWindows.json
+          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=linux&architecture=x64&image_type=jdk" -o javaLinux.json
+          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=x64&image_type=jdk" -o javaWindows.json
           javaLinuxUrl=$(cat javaLinux.json | jq --raw-output ".[0].binary.package.link")
           javaWindowsVersion=$(cat javaWindows.json | jq --raw-output ".[0].release_name")
           javaWindowsUrl=$(cat javaWindows.json | jq --raw-output ".[0].binary.package.link")
@@ -37,7 +37,7 @@ jobs:
           distribution: jdkfile
           jdkFile: ${{ runner.temp }}/javaCombined.tar.gz
           java-version: 21
-          architecture: ${{ runner.arch }}
+          architecture: x64
 
       - name: Setup C++ Dependencies
         run: sudo apt-get install -y gcc g++ gcc-mingw-w64 g++-mingw-w64 libx11-dev libxrandr-dev
