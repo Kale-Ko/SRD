@@ -2,20 +2,28 @@ plugins {
     id "java"
 }
 
-project.group = "io.github.kale_ko"
-project.version = project.project_version
+group = "io.github.kale_ko"
+version = project_version
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation "org.apache.logging.log4j:log4j-core:${log4j_version}"
+    implementation "org.apache.logging.log4j:log4j-slf4j2-impl:${log4j_version}"
+    implementation "org.fusesource.jansi:jansi:${jansi_version}"
+
+    implementation "io.netty:netty-all:${netty_version}"
+    implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastle_version}"
+    implementation "org.bouncycastle:bcpkix-jdk18on:${bouncycastle_version}"
+
     compileOnly "org.jetbrains:annotations:24.0.1"
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(project.java_version)
+        languageVersion = JavaLanguageVersion.of(java_version)
     }
 }
 
@@ -26,11 +34,11 @@ tasks.withType(JavaCompile).configureEach {
 jar {
     manifest {
         attributes "Name": "io/github/kale_ko/srd/",
-                "Specification-Title": "EJCL",
-                "Specification-Version": project.version,
+                "Specification-Title": "SRD",
+                "Specification-Version": version,
                 "Specification-Vendor": "Kale-Ko",
                 "Implementation-Title": "io.github.kale_ko.srd",
-                "Implementation-Version": project.version,
+                "Implementation-Version": version,
                 "Implementation-Vendor": "Kale-Ko",
                 "Sealed": true
     }
@@ -40,21 +48,20 @@ tasks.register("clientJar", Jar) {
     archiveClassifier = "client"
     manifest {
         attributes "Name": "io/github/kale_ko/srd/",
-                "Main-Class": "io.github.kale_ko.srd.ClientMain",
-                "Specification-Title": "EJCL",
-                "Specification-Version": project.version,
+                "Main-Class": "io.github.kale_ko.srd.ShadedMain",
+                "Shaded-Main-Class": "io.github.kale_ko.srd.ClientMain",
+                "Specification-Title": "SRD",
+                "Specification-Version": version,
                 "Specification-Vendor": "Kale-Ko",
                 "Implementation-Title": "io.github.kale_ko.srd",
-                "Implementation-Version": project.version,
+                "Implementation-Version": version,
                 "Implementation-Vendor": "Kale-Ko",
                 "Sealed": true
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.output)
-    from(configurations.runtimeClasspath.collect {
-        it.isDirectory() ? null : zipTree(it)
-    })
+    from(configurations.runtimeClasspath)
 }
 
 tasks.register("serverJar", Jar) {
@@ -63,12 +70,13 @@ tasks.register("serverJar", Jar) {
     archiveClassifier = "server"
     manifest {
         attributes "Name": "io/github/kale_ko/srd/",
-                "Main-Class": "io.github.kale_ko.srd.ServerMain",
-                "Specification-Title": "EJCL",
-                "Specification-Version": project.version,
+                "Main-Class": "io.github.kale_ko.srd.ShadedMain",
+                "Shaded-Main-Class": "io.github.kale_ko.srd.ServerMain",
+                "Specification-Title": "SRD",
+                "Specification-Version": version,
                 "Specification-Vendor": "Kale-Ko",
                 "Implementation-Title": "io.github.kale_ko.srd",
-                "Implementation-Version": project.version,
+                "Implementation-Version": version,
                 "Implementation-Vendor": "Kale-Ko",
                 "Sealed": true
     }
@@ -76,9 +84,7 @@ tasks.register("serverJar", Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.output)
     from(tasks.compileNatives.outputs.files)
-    from(configurations.runtimeClasspath.collect {
-        it.isDirectory() ? null : zipTree(it)
-    })
+    from(configurations.runtimeClasspath)
 }
 
 import java.nio.file.Files
@@ -93,8 +99,8 @@ tasks.register("compileNativeLinux", Exec) {
     }
 
     executable "x86_64-linux-gnu-g++"
-    args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux.so").toString(), "-std=c++20", "-O2", "-shared", "-I", project.rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/", "-l", "X11", "-l", "Xrandr"
-    workingDir project.rootDir
+    args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux.so").toString(), "-std=c++20", "-O2", "-shared", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/", "-l", "X11", "-l", "Xrandr"
+    workingDir rootDir
 
     inputs.files("src/main/native/desktopCapture-linux.cpp")
     outputs.files(outPath.resolve("libDesktopCapture-linux.so"))
@@ -109,8 +115,8 @@ tasks.register("compileNativeWindows", Exec) {
     }
 
     executable "x86_64-w64-mingw32-g++"
-    args "src/main/native/desktopCapture-windows.cpp", "-o", outPath.resolve("libDesktopCapture-windows.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-I", project.rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/", "-l", "gdi32"
-    workingDir project.rootDir
+    args "src/main/native/desktopCapture-windows.cpp", "-o", outPath.resolve("libDesktopCapture-windows.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/", "-l", "gdi32"
+    workingDir rootDir
 
     inputs.files("src/main/native/desktopCapture-windows.cpp")
     outputs.files(outPath.resolve("libDesktopCapture-windows.dll"))
