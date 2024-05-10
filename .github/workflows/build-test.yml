@@ -23,7 +23,7 @@ jobs:
           distribution: temurin
 
       - name: Setup C++ Dependencies
-        run: apt install gcc g++ gcc-mingw-w64 g++-mingw-w64 libx11-dev
+        run: sudo apt-get install -y gcc g++ gcc-mingw-w64 g++-mingw-w64 libx11-dev
 
       - name: Build Project
         uses: gradle/gradle-build-action@v3
