@@ -33,6 +33,6 @@ inline void throwException(JNIEnv* env, const char* message) {
     jclass clazz = env->FindClass("java/lang/RuntimeException");
     jstring messageObj = env->NewStringUTF(message);
     jthrowable exception = (jthrowable)env->NewObject(clazz, getConstructorId(env, clazz, "<init>", "(Ljava/lang/String;)V"), messageObj);
-    env->Throw(exception);
     env->DeleteLocalRef(clazz);
+    env->Throw(exception);
 }

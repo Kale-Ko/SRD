@@ -28,6 +28,8 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1crea
     }
 
     jstring displayNameObj = env->NewStringUTF(displayName);
+    XFree(displayName);
+
     jobject object = env->NewObject(selfClazz, getConstructorId(env, selfClazz, "<init>", "(JLjava/lang/String;)V"), (jlong)display, displayNameObj);
     env->DeleteLocalRef(displayNameObj);
     return object;
@@ -127,7 +129,7 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Sc
             data[j] = image->data[i + 2];
             data[j + 1] = image->data[i + 1];
             data[j + 2] = image->data[i];
-            data[j + 3] = 0;
+            data[j + 3] = 255;
         }
         break;
     default:
@@ -138,9 +140,14 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Sc
 
     jbyteArray dataObj = env->NewByteArray(dataSize);
     env->SetByteArrayRegion(dataObj, 0, dataSize, data);
+    delete data;
 
     jclass captureClazz = env->FindClass("io/github/kale_ko/srd/cpp/DesktopCapture$Capture");
     jobject captureObj = env->NewObject(captureClazz, getConstructorId(env, captureClazz, "<init>", "(II[B)V"), width, height, dataObj);
     env->DeleteLocalRef(captureClazz);
     return captureObj;
+}
+
+JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Screen_n_1close(JNIEnv* env, jobject self) {
+    return;
 }
