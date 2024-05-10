@@ -123,6 +123,8 @@ public class DesktopCapture implements AutoCloseable {
 
         private native Capture n_capture();
 
+        private native void n_close();
+
         @Override
         public @NotNull String toString() {
             return this.getClass().getSimpleName() + "{handle=" + this.handle + ", name='" + this.name + "', x=" + this.x + ", y=" + this.y + ", width=" + this.width + ", height=" + this.height + ", primary=" + this.primary + ", closed=" + desktop.closed + "}";
@@ -181,6 +183,12 @@ public class DesktopCapture implements AutoCloseable {
             throw new RuntimeException(this.getClass().getSimpleName() + " is already closed.");
         }
         this.closed = true;
+
+        if (this.screens != null) {
+            for (Screen screen : this.screens) {
+                screen.n_capture();
+            }
+        }
 
         this.n_close();
     }
