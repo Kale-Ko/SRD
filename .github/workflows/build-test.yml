@@ -29,13 +29,13 @@ jobs:
           mkdir -p java/linux/ && tar -xf javaLinux.tar.gz -C java/linux --strip-components 1
           mkdir -p java/windows/ && ln --symbolic . java/windows/$javaWindowsVersion && unzip -qx javaWindows.zip -d java/windows/
           cp -r java/windows/include/win32 java/linux/include/win32
-          cd java/linux/ && tar -cf ${{ runner.temp }}/javaCombined.tar * && cd ../../
+          cd java/linux/ && tar -cf ${{ runner.temp }}/javaCombined.tar * && gzip ${{ runner.temp }}/javaCombined.tar && cd ../../
 
       - name: Install JDK
         uses: actions/setup-java@v4
         with:
           distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/javaCombined.tar
+          jdkFile: ${{ runner.temp }}/javaCombined.tar.gz
           java-version: 21
           architecture: x64
 
