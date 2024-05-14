@@ -92,7 +92,7 @@ import java.nio.file.Path
 
 tasks.register("compileNativeLinux", Exec) {
     Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/")
-    Path outPath = Path.of("build/natives")
+    Path outPath = Path.of("build/natives/")
 
     doFirst {
         Files.createDirectories(outPath)
@@ -102,8 +102,8 @@ tasks.register("compileNativeLinux", Exec) {
     args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux.so").toString(), "-std=c++20", "-O2", "-shared", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/", "-l", "X11", "-l", "Xrandr"
     workingDir rootDir
 
-    inputs.files("src/main/native/desktopCapture-linux.cpp")
-    outputs.files(outPath.resolve("libDesktopCapture-linux.so"))
+    inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
+    outputs.files([outPath.resolve("libDesktopCapture-linux.so")])
 }
 
 tasks.register("compileNativeWindows", Exec) {
@@ -118,8 +118,8 @@ tasks.register("compileNativeWindows", Exec) {
     args "src/main/native/desktopCapture-windows.cpp", "-o", outPath.resolve("libDesktopCapture-windows.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/", "-l", "gdi32"
     workingDir rootDir
 
-    inputs.files("src/main/native/desktopCapture-windows.cpp")
-    outputs.files(outPath.resolve("libDesktopCapture-windows.dll"))
+    inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
+    outputs.files([outPath.resolve("libDesktopCapture-windows.dll")])
 }
 
 tasks.register("compileNatives") {

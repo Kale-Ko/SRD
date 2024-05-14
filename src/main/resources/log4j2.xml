@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout>
+        <Charset>UTF-8</Charset>
+        <Pattern>%highlight{[%date{HH:mm:ss}] [%logger %level]: %message{ansi} %throwable{full}%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=bright_magenta, TRACE=bright_cyan}</Pattern>
+      </PatternLayout>
+      <Select>
+        <SystemPropertyArbiter propertyName="env" propertyValue="debug">
+          <ThresholdFilter level="TRACE" onMatch="NEUTRAL" onMismatch="DENY"/>
+        </SystemPropertyArbiter>
+        <SystemPropertyArbiter propertyName="env" propertyValue="dev">
+          <ThresholdFilter level="DEBUG" onMatch="NEUTRAL" onMismatch="DENY"/>
+        </SystemPropertyArbiter>
+        <DefaultArbiter>
+          <ThresholdFilter level="INFO" onMatch="NEUTRAL" onMismatch="DENY"/>
+        </DefaultArbiter>
+      </Select>
+    </Console>
+
+    <SystemPropertyArbiter propertyName="env" propertyValue="prod">
+      <Console name="Journal" target="SYSTEM_OUT">
+        <PatternLayout>
+          <Charset>UTF-8</Charset>
+          <Pattern>%highlight{[%logger %level]: %message{ansi} %throwable{full}%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=bright_magenta, TRACE=bright_cyan}</Pattern>
+        </PatternLayout>
+        <ThresholdFilter level="INFO" onMatch="NEUTRAL" onMismatch="DENY"/>
+      </Console>
+
+      <File name="LogFile" fileName="latest.log" append="true" bufferedIO="true">
+        <PatternLayout>
+          <Charset>UTF-8</Charset>
+          <Pattern>[%date{HH:mm:ss}] [%logger %level]: %message %throwable{full}%n</Pattern>
+        </PatternLayout>
+        <ThresholdFilter level="INFO" onMatch="NEUTRAL" onMismatch="DENY"/>
+      </File>
+      <File name="DebugFile" fileName="debug.log" append="false" bufferedIO="true">
+        <PatternLayout>
+          <Charset>UTF-8</Charset>
+          <Pattern>[%date{HH:mm:ss}] [%logger %level]: %message %throwable{full}%n</Pattern>
+        </PatternLayout>
+        <ThresholdFilter level="DEBUG" onMatch="NEUTRAL" onMismatch="DENY"/>
+      </File>
+
+      <Async name="AsyncJournal">
+        <AppenderRef ref="Journal"/>
+        <ThresholdFilter level="INFO" onMatch="NEUTRAL" onMismatch="DENY"/>
+      </Async>
+      <Async name="AsyncLogFile">
+        <AppenderRef ref="LogFile"/>
+        <ThresholdFilter level="INFO" onMatch="NEUTRAL" onMismatch="DENY"/>
+      </Async>
+      <Async name="AsyncDebugFile">
+        <AppenderRef ref="DebugFile"/>
+        <ThresholdFilter level="DEBUG" onMatch="NEUTRAL" onMismatch="DENY"/>
+      </Async>
+    </SystemPropertyArbiter>
+
+    <Console name="None" target="SYSTEM_ERR">
+      <PatternLayout>
+        <Charset>UTF-8</Charset>
+        <Pattern></Pattern>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+    <Select>
+      <SystemPropertyArbiter propertyName="env" propertyValue="prod">
+        <Root level="OFF">
+          <AppenderRef ref="None"/>
+        </Root>
+
+        <Logger name="SRD-Server" level="DEBUG">
+          <AppenderRef ref="Journal"/>
+          <AppenderRef ref="AsyncLogFile"/>
+          <AppenderRef ref="AsyncDebugFile"/>
+        </Logger>
+      </SystemPropertyArbiter>
+      <DefaultArbiter>
+        <Root level="INFO">
+          <AppenderRef ref="Console"/>
+        </Root>
+
+        <Logger name="SRD-Server" level="TRACE"></Logger>
+      </DefaultArbiter>
+    </Select>
+  </Loggers>
+</Configuration>
