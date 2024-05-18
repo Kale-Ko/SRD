@@ -18,25 +18,16 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpsServer extends HttpServer {
-    private final @NotNull SslContext sslContext;
+    private final @NotNull Path certificatePath;
+    private final @NotNull Path privateKeyPath;
+
+    private SslContext sslContext;
 
     public HttpsServer(@NotNull Logger logger, @NotNull InetSocketAddress address, @NotNull Path certificatePath, @NotNull Path privateKeyPath) {
         super(logger, address);
 
-        try {
-            if (!Files.exists(certificatePath) && !Files.exists(privateKeyPath)) {
-                this.logger.debug("Creating new self signed certificate for host {}.", address.getHostName());
-
-                SelfSignedCertificate ssc = new SelfSignedCertificate(address.getHostName());
-                Files.copy(ssc.certificate().toPath(), certificatePath);
-                Files.copy(ssc.privateKey().toPath(), privateKeyPath);
-                ssc.delete();
-            }
-
-            this.sslContext = SslContextBuilder.forServer(certificatePath.toFile(), privateKeyPath.toFile()).startTls(false).build();
-        } catch (IOException | CertificateException e) {
-            throw new RuntimeException(e);
-        }
+        this.certificatePath = certificatePath;
+        this.privateKeyPath = privateKeyPath;
     }
 
     @Override
@@ -51,6 +42,30 @@ public class HttpsServer extends HttpServer {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected void run() {
+        try {
+            if (!Files.exists(certificatePath) && !Files.exists(privateKeyPath)) {
+                this.logger.debug("[{}] Creating new self signed certificate for host {}.", this.getName(), address.getHostName());
+
+                SelfSignedCertificate ssc = new SelfSignedCertificate(address.getHostName());
+                Files.copy(ssc.certificate().toPath(), certificatePath);
+                Files.copy(ssc.privateKey().toPath(), privateKeyPath);
+                ssc.delete();
+            }
+
+            this.logger.debug("[{}] Loading certificate from {}.", this.getName(), certificatePath.toFile());
+
+            this.sslContext = SslContextBuilder.forServer(certificatePath.toFile(), privateKeyPath.toFile()).startTls(false).build();
+        } catch (IOException | CertificateException e) {
+            this.logger.throwing(e);
+
+            throw new RuntimeException(e);
+        }
+
+        super.run();
     }
 
     @Override

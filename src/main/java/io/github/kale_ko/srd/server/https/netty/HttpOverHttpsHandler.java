@@ -47,7 +47,7 @@ public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
                 buffer.release();
             }
         } else {
-            parent.getLogger().warn("Unknown type passed to {}, {}!", this.getClass().getSimpleName(), msg.getClass().getSimpleName());
+            parent.getLogger().warn("[{}] Unknown type passed, {}!", parent.getName(), msg.getClass().getSimpleName());
 
             ctx.fireChannelRead(msg);
         }
