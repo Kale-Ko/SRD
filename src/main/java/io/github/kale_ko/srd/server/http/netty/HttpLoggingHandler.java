@@ -28,7 +28,7 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
         } else if (msg instanceof HttpOverHttpsHandler.Message) {
             parent.getLogger().trace("[{}] Read HttpOverHttps message", parent.getName());
         } else if (!(msg instanceof HttpContent)) {
-            parent.getLogger().warn("[{}] Unknown type passed, {}!", parent.getName(), msg.getClass().getSimpleName());
+            parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
         ctx.fireChannelRead(msg);
@@ -39,7 +39,7 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
         if (msg instanceof HttpResponse) {
             parent.getLogger().trace("[{}] Wrote message: {}", parent.getName(), msg);
         } else if (!(msg instanceof HttpContent)) {
-            parent.getLogger().warn("[{}] Unknown type passed, {}!", parent.getName(), msg.getClass().getSimpleName());
+            parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
         ctx.write(msg, promise);

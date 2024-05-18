@@ -39,7 +39,7 @@ public class HttpResponseHandler extends ChannelOutboundHandlerAdapter {
                 response.headers().add(name, headers.getAll(name));
             }
         } else if (!(msg instanceof HttpContent)) {
-            parent.getLogger().warn("[{}] Unknown type passed, {}!", parent.getName(), msg.getClass().getSimpleName());
+            parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
         ctx.write(msg, promise);
