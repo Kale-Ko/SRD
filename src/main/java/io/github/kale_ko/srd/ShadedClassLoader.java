@@ -99,6 +99,7 @@ public class ShadedClassLoader extends ClassLoader {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected URL findResource(String name) {
         if (!(this.resourceCatalog.containsKey(name) && !this.resourceCatalog.get(name).isEmpty())) {
@@ -114,6 +115,7 @@ public class ShadedClassLoader extends ClassLoader {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Enumeration<URL> findResources(String name) {
         if (!(this.resourceCatalog.containsKey(name) && !this.resourceCatalog.get(name).isEmpty())) {
