@@ -31,7 +31,7 @@ jobs:
           cp -r java/windows/include/win32 java/linux/include/win32
           cd java/ && tar -cf ${{ runner.temp }}/javaCombined.tar linux/ && gzip ${{ runner.temp }}/javaCombined.tar && cd ../
 
-      - name: Install JDK
+      - name: Setup Custom JDK
         uses: actions/setup-java@v4
         with:
           distribution: jdkfile
@@ -39,11 +39,20 @@ jobs:
           java-version: 21
           architecture: x64
 
-      - name: Setup C++ Dependencies
-        run: sudo apt-get install -y gcc g++ gcc-mingw-w64 g++-mingw-w64 libx11-dev libxrandr-dev
+      - name: Setup Dependencies
+        run: sudo apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu g++-mingw-w64-x86-64-win32 g++-mingw-w64-x86-64-win32 libx11-dev libxrandr-dev
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle
+      - name: Build Artifacts
         run: ./gradlew build
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "builds"
+          path: |
+            build/libs/SRD-*-client.jar
+            build/libs/SRD-*-server.jar
+            build/libs/SRD-*-manager.jar
