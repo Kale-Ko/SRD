@@ -9,7 +9,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
@@ -35,7 +34,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                     response.headers().set("X-Request-Address", request.headers().get("X-Request-Address"));
                     response.headers().set("X-Request-Ip", request.headers().get("X-Request-Ip"));
 
-                    if (request.decoderResult().isSuccess() && parent.getListener() != null) {
+                    if (request.decoderResult().isSuccess()) {
                         HttpResponseStatus preStatus;
                         try {
                             preStatus = parent.getListener().onPreRequest(parent, request);
@@ -59,38 +58,20 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                                 response.headers().set("X-Request-Address", request.headers().get("X-Request-Address"));
                                 response.headers().set("X-Request-Ip", request.headers().get("X-Request-Ip"));
 
-                                byte[] statusContent = String.format("<b>%s %s</b>", HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
-                                response.headers().set("Content-Length", statusContent.length);
-                                response.headers().set("Content-Type", "text/html");
-                                response.content().clear();
-                                response.content().writeBytes(statusContent);
+                                parent.getListener().onError(parent, request, response, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
                             }
                         } else {
                             response.setStatus(preStatus);
 
-                            byte[] statusContent = String.format("<b>%s %s</b>", preStatus.code(), preStatus.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
-                            response.headers().set("Content-Length", statusContent.length);
-                            response.headers().set("Content-Type", "text/html");
-                            response.content().clear();
-                            response.content().writeBytes(statusContent);
+                            parent.getListener().onError(parent, request, response, preStatus, null);
                         }
                     } else {
+                        response.setStatus(HttpResponseStatus.BAD_REQUEST);
+
                         if (request.decoderResult().cause() != null && request.decoderResult().cause().getMessage().equalsIgnoreCase("HTTP over HTTPS")) {
-                            response.setStatus(HttpResponseStatus.BAD_REQUEST);
-
-                            byte[] statusContent = String.format("<b>%s %s - HTTP was sent to an HTTPS port</b>", HttpResponseStatus.BAD_REQUEST.code(), HttpResponseStatus.BAD_REQUEST.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
-                            response.headers().set("Content-Length", statusContent.length);
-                            response.headers().set("Content-Type", "text/html");
-                            response.content().clear();
-                            response.content().writeBytes(statusContent);
+                            parent.getListener().onError(parent, request, response, HttpResponseStatus.BAD_REQUEST, "HTTP was sent to an HTTPS port");
                         } else {
-                            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-
-                            byte[] statusContent = String.format("<b>%s %s</b>", HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
-                            response.headers().set("Content-Length", statusContent.length);
-                            response.headers().set("Content-Type", "text/html");
-                            response.content().clear();
-                            response.content().writeBytes(statusContent);
+                            parent.getListener().onError(parent, request, response, HttpResponseStatus.BAD_REQUEST, null);
                         }
                     }
 
@@ -104,6 +85,8 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
         } else if (!(msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("Unknown type passed to {}, {}!", this.getClass().getSimpleName(), msg.getClass().getSimpleName());
 
+            ctx.fireChannelRead(msg);
+        } else {
             ctx.fireChannelRead(msg);
         }
     }

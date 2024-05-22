@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class HttpServer {
     protected final @NotNull Logger logger;
@@ -30,8 +29,8 @@ public class HttpServer {
     protected final @NotNull Object statusLock = new Object();
     protected boolean running = false;
 
-    protected @Nullable HttpServerListener listener = null;
-    protected @Nullable WsServerListener wsListener = null;
+    protected HttpServerListener listener;
+    protected WsServerListener wsListener;
 
     protected boolean wsEnabled = false;
     protected String wsPath = null;
@@ -78,11 +77,11 @@ public class HttpServer {
         return this.address;
     }
 
-    public @Nullable HttpServerListener getListener() {
+    public @NotNull HttpServerListener getListener() {
         return this.listener;
     }
 
-    public void setListener(@Nullable HttpServerListener listener) {
+    public void setListener(@NotNull HttpServerListener listener) {
         this.listener = listener;
     }
 
@@ -91,11 +90,11 @@ public class HttpServer {
         this.wsPath = path;
     }
 
-    public @Nullable WsServerListener getWebsocketListener() {
+    public @NotNull WsServerListener getWebsocketListener() {
         return this.wsListener;
     }
 
-    public void setWebsocketListener(@Nullable WsServerListener wsListener) {
+    public void setWebsocketListener(@NotNull WsServerListener wsListener) {
         this.wsListener = wsListener;
     }
 
@@ -109,6 +108,10 @@ public class HttpServer {
                 throw new RuntimeException(this.getClass().getSimpleName() + " is already running!");
             }
             this.running = true;
+
+            if (this.listener == null || (this.wsEnabled && this.wsListener == null)) {
+                throw new RuntimeException("Listeners must be defined for this server!");
+            }
 
             this.logger.info("[{}] Starting...", this.getName());
 
