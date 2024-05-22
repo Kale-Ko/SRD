@@ -21,6 +21,5 @@ public interface WsServerListener {
     }
 
     public default void onClose(@NotNull CloseWebSocketFrame frame) {
-
     }
 }

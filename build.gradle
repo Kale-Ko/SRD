@@ -91,6 +91,28 @@ tasks.register("serverJar", Jar) {
     from(configurations.runtimeClasspath)
 }
 
+tasks.register("managerJar", Jar) {
+    dependsOn tasks.compileNatives
+
+    archiveClassifier = "manager"
+    manifest {
+        attributes "Name": "io/github/kale_ko/srd/",
+                "Main-Class": "io.github.kale_ko.srd.ShadedMain",
+                "Shaded-Main-Class": "io.github.kale_ko.srd.ManagerMain",
+                "Specification-Title": "SRD",
+                "Specification-Version": version,
+                "Specification-Vendor": "Kale-Ko",
+                "Implementation-Title": "io.github.kale_ko.srd",
+                "Implementation-Version": version,
+                "Implementation-Vendor": "Kale-Ko",
+                "Sealed": true
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.output)
+    from(configurations.runtimeClasspath)
+}
+
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -137,4 +159,5 @@ tasks.register("compileNatives") {
 build {
     finalizedBy tasks.clientJar
     finalizedBy tasks.serverJar
+    finalizedBy tasks.managerJar
 }

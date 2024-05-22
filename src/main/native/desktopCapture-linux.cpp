@@ -1,7 +1,7 @@
 #include "desktopCapture-common.cpp"
 
-#include "io_github_kale_ko_srd_cpp_DesktopCapture.h"
-#include "io_github_kale_ko_srd_cpp_DesktopCapture_Screen.h"
+#include "io_github_kale_ko_srd_capture_DesktopCapture.h"
+#include "io_github_kale_ko_srd_capture_DesktopCapture_Screen.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -10,11 +10,11 @@
 #include <vector>
 
 /*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
+ * Class:     io_github_kale_ko_srd_capture_DesktopCapture
  * Method:    create
- * Signature: ()Lio/github/kale_ko/srd/cpp/DesktopCapture;
+ * Signature: ()Lio/github/kale_ko/srd/capture/DesktopCapture;
  */
-JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1create(JNIEnv* env, jclass selfClazz) {
+JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_n_1create(JNIEnv* env, jclass selfClazz) {
     Display* display = XOpenDisplay(NULL);
     if (display == NULL) {
         throwException(env, "Failed to open X11 display.");
@@ -36,26 +36,26 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1crea
 }
 
 /*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
+ * Class:     io_github_kale_ko_srd_capture_DesktopCapture
  * Method:    destroy
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1close(JNIEnv* env, jobject self) {
+JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_n_1close(JNIEnv* env, jobject self) {
     Display* display = (Display*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
 
     XCloseDisplay(display);
 }
 
 /*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture
+ * Class:     io_github_kale_ko_srd_capture_DesktopCapture
  * Method:    n_getScreens
- * Signature: ()[Lio/github/kale_ko/srd/cpp/DesktopCapture/Screen;
+ * Signature: ()[Lio/github/kale_ko/srd/capture/DesktopCapture/Screen;
  */
-JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_1getScreens(JNIEnv* env, jobject self) {
+JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_n_1getScreens(JNIEnv* env, jobject self) {
     Display* display = (Display*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
 
     std::vector<jobject> screens;
-    jclass screenClazz = env->FindClass("io/github/kale_ko/srd/cpp/DesktopCapture$Screen");
+    jclass screenClazz = env->FindClass("io/github/kale_ko/srd/capture/DesktopCapture$Screen");
 
     int xScreenCount = XScreenCount(display);
     for (int i = 0; i < xScreenCount; i++) {
@@ -73,7 +73,7 @@ JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_
                 XRRCrtcInfo* xCrtcInfo = XRRGetCrtcInfo(display, xScreenResources, xOutputInfo->crtc);
 
                 jstring screenNameObj = env->NewStringUTF(xOutputInfo->name);
-                jobject screenObj = env->NewObject(screenClazz, getConstructorId(env, screenClazz, "<init>", "(Lio/github/kale_ko/srd/cpp/DesktopCapture;JLjava/lang/String;IIIIZ)V"), self, (jlong)xScreen, screenNameObj, xCrtcInfo->x, xCrtcInfo->y, xCrtcInfo->width, xCrtcInfo->height, isPrimary);
+                jobject screenObj = env->NewObject(screenClazz, getConstructorId(env, screenClazz, "<init>", "(Lio/github/kale_ko/srd/capture/DesktopCapture;JLjava/lang/String;IIIIZ)V"), self, (jlong)xScreen, screenNameObj, xCrtcInfo->x, xCrtcInfo->y, xCrtcInfo->width, xCrtcInfo->height, isPrimary);
                 env->DeleteLocalRef(screenNameObj);
                 screens.push_back(screenObj);
 
@@ -95,12 +95,12 @@ JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_n_
 }
 
 /*
- * Class:     io_github_kale_ko_srd_cpp_DesktopCapture_Screen
+ * Class:     io_github_kale_ko_srd_capture_DesktopCapture_Screen
  * Method:    n_capture
- * Signature: ()Lio/github/kale_ko/srd/cpp/DesktopCapture/Screen/ScreenCapture;
+ * Signature: ()Lio/github/kale_ko/srd/capture/DesktopCapture/Screen/ScreenCapture;
  */
-JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Screen_n_1capture(JNIEnv* env, jobject self) {
-    jobject desktopObj = env->GetObjectField(self, getFieldId(env, self, "desktop", "Lio/github/kale_ko/srd/cpp/DesktopCapture;"));
+JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_00024Screen_n_1capture(JNIEnv* env, jobject self) {
+    jobject desktopObj = env->GetObjectField(self, getFieldId(env, self, "desktop", "Lio/github/kale_ko/srd/capture/DesktopCapture;"));
     Display* display = (Display*)env->GetLongField(desktopObj, getFieldId(env, desktopObj, "handle", "J"));
     Screen* screen = (Screen*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
     Window window = XRootWindowOfScreen(screen);
@@ -142,12 +142,12 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Sc
     env->SetByteArrayRegion(dataObj, 0, dataSize, data);
     delete data;
 
-    jclass captureClazz = env->FindClass("io/github/kale_ko/srd/cpp/DesktopCapture$Capture");
+    jclass captureClazz = env->FindClass("io/github/kale_ko/srd/capture/DesktopCapture$Capture");
     jobject captureObj = env->NewObject(captureClazz, getConstructorId(env, captureClazz, "<init>", "(II[B)V"), width, height, dataObj);
     env->DeleteLocalRef(captureClazz);
     return captureObj;
 }
 
-JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_cpp_DesktopCapture_00024Screen_n_1close(JNIEnv* env, jobject self) {
+JNIEXPORT void JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_00024Screen_n_1close(JNIEnv* env, jobject self) {
     return;
 }

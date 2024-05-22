@@ -1,4 +1,4 @@
-package io.github.kale_ko.srd.cpp;
+package io.github.kale_ko.srd.capture;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
