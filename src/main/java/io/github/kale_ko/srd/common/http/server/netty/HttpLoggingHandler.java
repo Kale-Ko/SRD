@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpStatusClass;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpLoggingHandler extends ChannelDuplexHandler {
@@ -27,7 +28,7 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
             parent.getLogger().trace("[{}] Read message #{} from {}: {}", parent.getName(), request.headers().get("X-Request-Id"), request.headers().get("X-Request-Address"), request);
 
             parent.getLogger().info("[{}] [{} #{}] {} {} {}", parent.getName(), request.headers().get("X-Request-Ip"), request.headers().get("X-Request-Id").split("-")[0], request.protocolVersion().text(), request.method().name(), request.uri());
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
@@ -44,7 +45,7 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
             } else {
                 parent.getLogger().info("[{}] [{} #{}] {} {} {}", parent.getName(), response.headers().get("X-Request-Ip"), response.headers().get("X-Request-Id").split("-")[0], response.protocolVersion().text(), response.status().code(), response.status().reasonPhrase());
             }
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
