@@ -1,6 +1,6 @@
-package io.github.kale_ko.srd.server.https.netty;
+package io.github.kale_ko.srd.common.https.server.netty;
 
-import io.github.kale_ko.srd.server.https.HttpsServer;
+import io.github.kale_ko.srd.common.https.server.HttpsServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.DecoderException;

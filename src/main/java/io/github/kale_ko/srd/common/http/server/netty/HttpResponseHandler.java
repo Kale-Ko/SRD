@@ -1,6 +1,6 @@
-package io.github.kale_ko.srd.server.http.netty;
+package io.github.kale_ko.srd.common.http.server.netty;
 
-import io.github.kale_ko.srd.server.http.HttpServer;
+import io.github.kale_ko.srd.common.http.server.HttpServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;

@@ -1,8 +1,8 @@
-package io.github.kale_ko.srd.server.https;
+package io.github.kale_ko.srd.common.https.server;
 
-import io.github.kale_ko.srd.server.http.HttpServer;
-import io.github.kale_ko.srd.server.https.netty.HttpOverHttpsHandler;
-import io.github.kale_ko.srd.server.https.netty.HttpsExceptionHandler;
+import io.github.kale_ko.srd.common.http.server.HttpServer;
+import io.github.kale_ko.srd.common.https.server.netty.HttpOverHttpsHandler;
+import io.github.kale_ko.srd.common.https.server.netty.HttpsExceptionHandler;
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;

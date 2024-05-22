@@ -1,6 +1,6 @@
-package io.github.kale_ko.srd.server.http;
+package io.github.kale_ko.srd.common.http.server;
 
-import io.github.kale_ko.srd.server.http.netty.*;
+import io.github.kale_ko.srd.common.http.server.netty.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
