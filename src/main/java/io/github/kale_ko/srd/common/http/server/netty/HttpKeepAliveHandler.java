@@ -1,6 +1,7 @@
 package io.github.kale_ko.srd.common.http.server.netty;
 
 import io.github.kale_ko.srd.common.http.server.HttpServer;
+import io.github.kale_ko.srd.common.https.server.netty.HttpOverHttpsHandler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,7 +41,7 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
             }
 
             ctx.channel().attr(REQUEST_COUNT_ATTRIBUTE).set(ctx.channel().attr(REQUEST_COUNT_ATTRIBUTE).get() + 1);
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof HttpOverHttpsHandler.HttpOverHttpsMessage)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
