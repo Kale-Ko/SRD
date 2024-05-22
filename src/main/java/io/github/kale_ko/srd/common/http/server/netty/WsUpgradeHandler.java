@@ -80,7 +80,7 @@ public class WsUpgradeHandler extends ChannelInboundHandlerAdapter {
                                     parent.getListener().onError(parent, request, response, HttpResponseStatus.HTTP_VERSION_NOT_SUPPORTED, null);
                                 }
                             } catch (Exception e) {
-                                parent.getLogger().error("Unhandled exception occurred in HttpServerListener#onRequest", e);
+                                parent.getLogger().error("[{}] Unhandled exception occurred in HttpServerListener#onRequest", parent.getName(), e);
 
                                 response.release();
                                 response = new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -113,7 +113,7 @@ public class WsUpgradeHandler extends ChannelInboundHandlerAdapter {
                 ctx.fireChannelRead(msg);
             }
         } else if (!(msg instanceof WebSocketFrame)) {
-            parent.getLogger().warn("Unknown type passed to {}, {}!", this.getClass().getSimpleName(), msg.getClass().getSimpleName());
+            parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
 
             ctx.fireChannelRead(msg);
         } else {
