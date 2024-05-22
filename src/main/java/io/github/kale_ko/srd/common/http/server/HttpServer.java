@@ -30,7 +30,11 @@ public class HttpServer {
     protected final @NotNull Object statusLock = new Object();
     protected boolean running = false;
 
-    protected @Nullable HttpServerListener listener;
+    protected @Nullable HttpServerListener listener = null;
+    protected @Nullable WsServerListener wsListener = null;
+
+    protected boolean wsEnabled = false;
+    protected String wsPath = null;
 
     protected Thread thread;
     protected EventLoopGroup serverWorker;
@@ -54,6 +58,18 @@ public class HttpServer {
         }
     }
 
+    public @NotNull URI getWebsocketUrl() {
+        if (!wsEnabled) {
+            throw new RuntimeException("Websocket not enabled!");
+        }
+
+        try {
+            return new URI("ws", null, this.getAddress().getHostString(), this.getAddress().getPort(), this.wsPath, null, null);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public @NotNull Logger getLogger() {
         return this.logger;
     }
@@ -68,6 +84,19 @@ public class HttpServer {
 
     public void setListener(@Nullable HttpServerListener listener) {
         this.listener = listener;
+    }
+
+    public void enableWebsocket(@NotNull String path) {
+        this.wsEnabled = true;
+        this.wsPath = path;
+    }
+
+    public @Nullable WsServerListener getWebsocketListener() {
+        return this.wsListener;
+    }
+
+    public void setWebsocketListener(@Nullable WsServerListener wsListener) {
+        this.wsListener = wsListener;
     }
 
     public boolean isRunning() {
@@ -167,6 +196,10 @@ public class HttpServer {
         channel.pipeline().addLast("HttpKeepAliveHandler", new HttpKeepAliveHandler(this));
         channel.pipeline().addLast("HttpObjectAggregator", new HttpObjectAggregator(20971520));
         channel.pipeline().addAfter("HttpObjectAggregator", "HttpRequestHandler", new HttpRequestHandler(this));
+        if (this.wsEnabled) {
+            channel.pipeline().addBefore("HttpRequestHandler", "WsUpgradeHandler", new WsUpgradeHandler(this));
+            channel.pipeline().addAfter("HttpRequestHandler", "WsFrameHandler", new WsFrameHandler(this));
+        }
         channel.pipeline().addLast("HttpExceptionHandler", new HttpExceptionHandler(this));
     }
 }

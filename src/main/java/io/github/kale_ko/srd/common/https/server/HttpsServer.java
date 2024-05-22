@@ -45,6 +45,19 @@ public class HttpsServer extends HttpServer {
     }
 
     @Override
+    public @NotNull URI getWebsocketUrl() {
+        if (!wsEnabled) {
+            throw new RuntimeException("Websocket not enabled!");
+        }
+
+        try {
+            return new URI("wss", null, this.getAddress().getHostString(), this.getAddress().getPort(), this.wsPath, null, null);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     protected void run() {
         try {
             if (!Files.exists(certificatePath) && !Files.exists(privateKeyPath)) {
