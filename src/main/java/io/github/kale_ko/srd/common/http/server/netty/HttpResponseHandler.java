@@ -7,6 +7,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ public class HttpResponseHandler extends ChannelOutboundHandlerAdapter {
             for (String name : nameStream.toList()) {
                 response.headers().add(name, headers.getAll(name));
             }
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 

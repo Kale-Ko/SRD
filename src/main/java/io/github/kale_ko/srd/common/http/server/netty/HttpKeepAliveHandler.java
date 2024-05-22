@@ -6,6 +6,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.AttributeKey;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +41,7 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
             }
 
             ctx.channel().attr(REQUEST_COUNT_ATTRIBUTE).set(ctx.channel().attr(REQUEST_COUNT_ATTRIBUTE).get() + 1);
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
@@ -68,7 +69,7 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
             if (!keepAlive) {
                 promise = promise.unvoid().addListener(ChannelFutureListener.CLOSE);
             }
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 

@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import java.net.InetSocketAddress;
 import java.security.SecureRandom;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class HttpRequestMetaHandler extends ChannelInboundHandlerAdapter {
 
                 request.headers().set("X-Request-Address", ctx.channel().remoteAddress().toString());
             }
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 

@@ -6,6 +6,7 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpResponseMetaHandler extends ChannelOutboundHandlerAdapter {
@@ -25,7 +26,7 @@ public class HttpResponseMetaHandler extends ChannelOutboundHandlerAdapter {
             response.headers().remove("X-Request-Id");
             response.headers().remove("X-Request-Address");
             response.headers().remove("X-Request-Ip");
-        } else if (!(msg instanceof HttpContent)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
