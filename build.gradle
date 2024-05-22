@@ -21,7 +21,6 @@ dependencies {
     for (String natives : ["windows-x86_64", "linux-x86_64"]) {
         runtimeOnly "com.aayushatharva.brotli4j:native-${natives}:${brotli4j_version}"
     }
-    implementation "com.github.luben:zstd-jni:${zstd_version}"
 
     compileOnly "org.jetbrains:annotations:24.0.1"
 }

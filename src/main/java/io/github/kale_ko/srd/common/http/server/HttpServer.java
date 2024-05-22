@@ -163,7 +163,6 @@ public class HttpServer {
         channel.pipeline().addLast("HttpContentCompressor[deflate]", new HttpContentCompressor(StandardCompressionOptions.deflate(9, 15, 8)));
         channel.pipeline().addLast("HttpContentCompressor[gzip]", new HttpContentCompressor(StandardCompressionOptions.gzip(9, 15, 8)));
         channel.pipeline().addLast("HttpContentCompressor[brotli]", new HttpContentCompressor(StandardCompressionOptions.brotli()));
-        channel.pipeline().addLast("HttpContentCompressor[zstd]", new HttpContentCompressor(StandardCompressionOptions.zstd(9, 15, 1024 * 32)));
         channel.pipeline().addLast("HttpContentDecompressor", new HttpContentDecompressor());
         channel.pipeline().addLast("HttpKeepAliveHandler", new HttpKeepAliveHandler(this));
         channel.pipeline().addLast("HttpObjectAggregator", new HttpObjectAggregator(20971520));
