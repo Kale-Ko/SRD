@@ -1,6 +1,6 @@
 package io.github.kale_ko.srd.common.https.server.netty;
 
-import io.github.kale_ko.srd.common.https.server.HttpsServer;
+import io.github.kale_ko.srd.common.http.server.HttpServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.DecoderException;
@@ -9,13 +9,13 @@ import javax.net.ssl.SSLHandshakeException;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpsExceptionHandler extends ChannelInboundHandlerAdapter {
-    protected final @NotNull HttpsServer parent;
+    protected final @NotNull HttpServer parent;
 
-    public HttpsExceptionHandler(@NotNull HttpsServer parent) {
+    public HttpsExceptionHandler(@NotNull HttpServer parent) {
         this.parent = parent;
     }
 
-    public @NotNull HttpsServer getParent() {
+    public @NotNull HttpServer getParent() {
         return this.parent;
     }
 

@@ -1,6 +1,6 @@
 package io.github.kale_ko.srd.common.https.server.netty;
 
-import io.github.kale_ko.srd.common.https.server.HttpsServer;
+import io.github.kale_ko.srd.common.http.server.HttpServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,13 +12,13 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
-    protected final @NotNull HttpsServer parent;
+    protected final @NotNull HttpServer parent;
 
-    public HttpOverHttpsHandler(@NotNull HttpsServer parent) {
+    public HttpOverHttpsHandler(@NotNull HttpServer parent) {
         this.parent = parent;
     }
 
-    public @NotNull HttpsServer getParent() {
+    public @NotNull HttpServer getParent() {
         return this.parent;
     }
 

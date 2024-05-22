@@ -63,7 +63,7 @@ public class HttpServer {
     }
 
     public @Nullable HttpServerListener getListener() {
-        return listener;
+        return this.listener;
     }
 
     public void setListener(@Nullable HttpServerListener listener) {
