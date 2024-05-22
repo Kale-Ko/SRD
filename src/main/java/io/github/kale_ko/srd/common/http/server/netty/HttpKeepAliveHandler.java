@@ -63,13 +63,15 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
 
                 response.headers().set("Connection", keepAlive ? "keep-alive" : "close");
             }
-        } else if (msg instanceof LastHttpContent) {
+        }
+        if (msg instanceof LastHttpContent) {
             boolean keepAlive = ctx.channel().attr(KEEPALIVE_ATTRIBUTE).get();
 
             if (!keepAlive) {
                 promise = promise.unvoid().addListener(ChannelFutureListener.CLOSE);
             }
-        } else if (!(msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
+        }
+        if (!(msg instanceof HttpResponse || msg instanceof HttpContent || msg instanceof WebSocketFrame)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 
