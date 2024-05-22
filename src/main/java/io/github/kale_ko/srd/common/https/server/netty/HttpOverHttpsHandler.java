@@ -2,8 +2,13 @@ package io.github.kale_ko.srd.common.https.server.netty;
 
 import io.github.kale_ko.srd.common.https.server.HttpsServer;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.DecoderResult;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 import org.jetbrains.annotations.NotNull;
 
 public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
@@ -38,7 +43,12 @@ public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
 
             String string = stringBuilder.toString();
             if (string.contains("HTTP")) {
-                ctx.fireChannelRead(new HttpOverHttpsMessage());
+                DefaultFullHttpRequest response = new DefaultFullHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-request", Unpooled.buffer(0));
+                response.setDecoderResult(DecoderResult.failure(new RuntimeException("HTTP over HTTPS")));
+
+                ctx.pipeline().remove("SslHandler");
+
+                ctx.fireChannelRead(response);
 
                 buffer.release();
             } else {
@@ -51,8 +61,5 @@ public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
 
             ctx.fireChannelRead(msg);
         }
-    }
-
-    public static class HttpOverHttpsMessage {
     }
 }

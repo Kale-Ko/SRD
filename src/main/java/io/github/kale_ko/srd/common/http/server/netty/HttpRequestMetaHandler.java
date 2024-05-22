@@ -1,7 +1,6 @@
 package io.github.kale_ko.srd.common.http.server.netty;
 
 import io.github.kale_ko.srd.common.http.server.HttpServer;
-import io.github.kale_ko.srd.common.https.server.netty.HttpOverHttpsHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpContent;
@@ -39,7 +38,7 @@ public class HttpRequestMetaHandler extends ChannelInboundHandlerAdapter {
 
                 request.headers().set("X-Request-Address", ctx.channel().remoteAddress().toString());
             }
-        } else if (!(msg instanceof HttpContent || msg instanceof HttpOverHttpsHandler.HttpOverHttpsMessage)) {
+        } else if (!(msg instanceof HttpContent)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 

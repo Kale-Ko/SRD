@@ -1,7 +1,6 @@
 package io.github.kale_ko.srd.common.http.server.netty;
 
 import io.github.kale_ko.srd.common.http.server.HttpServer;
-import io.github.kale_ko.srd.common.https.server.netty.HttpOverHttpsHandler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -28,8 +27,6 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
             parent.getLogger().trace("[{}] Read message #{} from {}: {}", parent.getName(), request.headers().get("X-Request-Id"), request.headers().get("X-Request-Address"), request);
 
             parent.getLogger().info("[{}] [{} #{}] {} {} {}", parent.getName(), request.headers().get("X-Request-Ip"), request.headers().get("X-Request-Id").split("-")[0], request.protocolVersion().text(), request.method().name(), request.uri());
-        } else if (msg instanceof HttpOverHttpsHandler.HttpOverHttpsMessage) {
-            parent.getLogger().trace("[{}] Read HttpOverHttps message", parent.getName());
         } else if (!(msg instanceof HttpContent)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }

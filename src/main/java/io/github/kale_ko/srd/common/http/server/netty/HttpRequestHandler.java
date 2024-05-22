@@ -34,7 +34,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                     response.headers().set("X-Request-Address", request.headers().get("X-Request-Address"));
                     response.headers().set("X-Request-Ip", request.headers().get("X-Request-Ip"));
 
-                    if (parent.getListener() != null) {
+                    if (request.decoderResult().isSuccess() && parent.getListener() != null) {
                         HttpResponseStatus preStatus;
                         try {
                             preStatus = parent.getListener().onPreRequest(parent, request);
@@ -70,11 +70,19 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                             response.content().writeBytes(statusContent);
                         }
                     } else {
-                        byte[] statusContent = String.format("<b>%s %s</b>", HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
-                        response.headers().set("Content-Length", statusContent.length);
-                        response.headers().set("Content-Type", "text/html");
-                        response.content().clear();
-                        response.content().writeBytes(statusContent);
+                        if (request.decoderResult().cause() != null && request.decoderResult().cause().getMessage().equalsIgnoreCase("HTTP over HTTPS")) {
+                            byte[] statusContent = String.format("<b>%s %s - HTTP was sent to an HTTPS port</b>", HttpResponseStatus.BAD_REQUEST.code(), HttpResponseStatus.BAD_REQUEST.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
+                            response.headers().set("Content-Length", statusContent.length);
+                            response.headers().set("Content-Type", "text/html");
+                            response.content().clear();
+                            response.content().writeBytes(statusContent);
+                        } else {
+                            byte[] statusContent = String.format("<b>%s %s</b>", HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
+                            response.headers().set("Content-Length", statusContent.length);
+                            response.headers().set("Content-Type", "text/html");
+                            response.content().clear();
+                            response.content().writeBytes(statusContent);
+                        }
                     }
 
                     ctx.writeAndFlush(response).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
