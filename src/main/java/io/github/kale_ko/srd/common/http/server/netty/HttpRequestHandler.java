@@ -54,6 +54,10 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                                 response = new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
                                 response.retain();
 
+                                response.headers().set("X-Request-Id", request.headers().get("X-Request-Id"));
+                                response.headers().set("X-Request-Address", request.headers().get("X-Request-Address"));
+                                response.headers().set("X-Request-Ip", request.headers().get("X-Request-Ip"));
+
                                 byte[] statusContent = String.format("<b>%s %s</b>", HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
                                 response.headers().set("Content-Length", statusContent.length);
                                 response.headers().set("Content-Type", "text/html");
@@ -71,12 +75,16 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                         }
                     } else {
                         if (request.decoderResult().cause() != null && request.decoderResult().cause().getMessage().equalsIgnoreCase("HTTP over HTTPS")) {
+                            response.setStatus(HttpResponseStatus.BAD_REQUEST);
+
                             byte[] statusContent = String.format("<b>%s %s - HTTP was sent to an HTTPS port</b>", HttpResponseStatus.BAD_REQUEST.code(), HttpResponseStatus.BAD_REQUEST.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
                             response.headers().set("Content-Length", statusContent.length);
                             response.headers().set("Content-Type", "text/html");
                             response.content().clear();
                             response.content().writeBytes(statusContent);
                         } else {
+                            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+
                             byte[] statusContent = String.format("<b>%s %s</b>", HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()).getBytes(StandardCharsets.UTF_8);
                             response.headers().set("Content-Length", statusContent.length);
                             response.headers().set("Content-Type", "text/html");
