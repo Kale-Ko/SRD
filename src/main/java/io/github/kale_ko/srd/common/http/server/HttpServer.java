@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class HttpServer {
     protected final @NotNull Logger logger;
@@ -29,6 +30,8 @@ public class HttpServer {
     protected final @NotNull Object statusLock = new Object();
     protected boolean running = false;
 
+    protected @Nullable HttpServerListener listener;
+
     protected Thread thread;
     protected EventLoopGroup serverWorker;
     protected EventLoopGroup connectionWorker;
@@ -37,14 +40,6 @@ public class HttpServer {
         this.logger = logger;
 
         this.address = address;
-    }
-
-    public @NotNull Logger getLogger() {
-        return this.logger;
-    }
-
-    public @NotNull InetSocketAddress getAddress() {
-        return this.address;
     }
 
     public @NotNull String getName() {
@@ -57,6 +52,22 @@ public class HttpServer {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public @NotNull Logger getLogger() {
+        return this.logger;
+    }
+
+    public @NotNull InetSocketAddress getAddress() {
+        return this.address;
+    }
+
+    public @Nullable HttpServerListener getListener() {
+        return listener;
+    }
+
+    public void setListener(@Nullable HttpServerListener listener) {
+        this.listener = listener;
     }
 
     public boolean isRunning() {

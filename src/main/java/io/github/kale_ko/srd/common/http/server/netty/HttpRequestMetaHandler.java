@@ -25,7 +25,7 @@ public class HttpRequestMetaHandler extends ChannelInboundHandlerAdapter {
     protected final @NotNull SecureRandom random = new SecureRandom();
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
         if (msg instanceof HttpRequest request) {
             UUID uuid = new UUID(random.nextLong(), random.nextLong());
 
@@ -39,7 +39,7 @@ public class HttpRequestMetaHandler extends ChannelInboundHandlerAdapter {
 
                 request.headers().set("X-Request-Address", ctx.channel().remoteAddress().toString());
             }
-        } else if (!(msg instanceof HttpContent || msg instanceof HttpOverHttpsHandler.Message)) {
+        } else if (!(msg instanceof HttpContent || msg instanceof HttpOverHttpsHandler.HttpOverHttpsMessage)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
         }
 

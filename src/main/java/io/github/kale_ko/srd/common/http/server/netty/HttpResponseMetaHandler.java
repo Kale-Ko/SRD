@@ -20,7 +20,7 @@ public class HttpResponseMetaHandler extends ChannelOutboundHandlerAdapter {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) {
         if (msg instanceof HttpResponse response) {
             response.headers().remove("X-Request-Id");
             response.headers().remove("X-Request-Address");

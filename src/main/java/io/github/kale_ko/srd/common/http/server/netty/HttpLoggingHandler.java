@@ -23,12 +23,12 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
         if (msg instanceof HttpRequest request) {
             parent.getLogger().trace("[{}] Read message #{} from {}: {}", parent.getName(), request.headers().get("X-Request-Id"), request.headers().get("X-Request-Address"), request);
 
             parent.getLogger().info("[{}] [{} #{}] {} {} {}", parent.getName(), request.headers().get("X-Request-Ip"), request.headers().get("X-Request-Id").split("-")[0], request.protocolVersion().text(), request.method().name(), request.uri());
-        } else if (msg instanceof HttpOverHttpsHandler.Message) {
+        } else if (msg instanceof HttpOverHttpsHandler.HttpOverHttpsMessage) {
             parent.getLogger().trace("[{}] Read HttpOverHttps message", parent.getName());
         } else if (!(msg instanceof HttpContent)) {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
@@ -38,7 +38,7 @@ public class HttpLoggingHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) {
         if (msg instanceof HttpResponse response) {
             parent.getLogger().trace("[{}] Wrote message #{} to {}: {}", parent.getName(), response.headers().get("X-Request-Id"), response.headers().get("X-Request-Address"), response);
 

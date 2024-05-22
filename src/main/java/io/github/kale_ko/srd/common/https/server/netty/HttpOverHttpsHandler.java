@@ -38,7 +38,7 @@ public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
 
             String string = stringBuilder.toString();
             if (string.contains("HTTP")) {
-                ctx.fireChannelRead(new Message());
+                ctx.fireChannelRead(new HttpOverHttpsMessage());
 
                 buffer.release();
             } else {
@@ -53,6 +53,6 @@ public class HttpOverHttpsHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    public static class Message {
+    public static class HttpOverHttpsMessage {
     }
 }

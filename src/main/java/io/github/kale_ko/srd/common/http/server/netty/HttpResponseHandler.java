@@ -22,7 +22,7 @@ public class HttpResponseHandler extends ChannelOutboundHandlerAdapter {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) {
         if (msg instanceof HttpResponse response) {
             HttpHeaders headers = response.headers().copy();
             response.headers().clear();

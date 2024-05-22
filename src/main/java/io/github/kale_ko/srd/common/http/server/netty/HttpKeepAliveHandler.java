@@ -24,7 +24,7 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
     protected static final @NotNull AttributeKey<Integer> REQUEST_COUNT_ATTRIBUTE = AttributeKey.newInstance("requestCount");
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) {
+    public void channelActive(@NotNull ChannelHandlerContext ctx) {
         ctx.channel().attr(KEEPALIVE_ATTRIBUTE).set(true);
         ctx.channel().attr(REQUEST_COUNT_ATTRIBUTE).set(0);
 
@@ -32,7 +32,7 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
         if (msg instanceof HttpRequest request) {
             boolean keepAlive = HttpUtil.isKeepAlive(request);
             if (!keepAlive) {
@@ -48,7 +48,7 @@ public class HttpKeepAliveHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) {
         if (msg instanceof HttpResponse response) {
             if (response.status().codeClass() == HttpStatusClass.INFORMATIONAL) {
                 ctx.write(msg, promise);

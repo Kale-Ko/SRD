@@ -22,7 +22,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
         if (msg instanceof FullHttpRequest request) {
             try {
                 FullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -51,7 +51,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) {
+    public void channelReadComplete(@NotNull ChannelHandlerContext ctx) {
         ctx.flush();
     }
 }
