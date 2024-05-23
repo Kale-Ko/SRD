@@ -39,32 +39,37 @@ public class WsFrameHandler extends ChannelDuplexHandler {
     @Override
     public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
         if (msg instanceof WebSocketFrame frame) {
-            if (frame instanceof TextWebSocketFrame textFrame) {
-                parent.getWebsocketListener().onTextMessage(new WsChannel(ctx.channel()), textFrame);
-            } else if (frame instanceof BinaryWebSocketFrame binaryFrame) {
-                parent.getWebsocketListener().onBinaryMessage(new WsChannel(ctx.channel()), binaryFrame);
-            } else if (frame instanceof PingWebSocketFrame pingFrame) {
-                parent.getWebsocketListener().onPing(new WsChannel(ctx.channel()), pingFrame);
-            } else if (frame instanceof PongWebSocketFrame pongFrame) {
-                parent.getWebsocketListener().onPong(new WsChannel(ctx.channel()), pongFrame);
-            } else if (frame instanceof CloseWebSocketFrame closeFrame) {
-                CloseState closeState = ctx.channel().attr(CLOSESTATE_ATTRIBUTE).get();
+            try {
+                if (frame instanceof TextWebSocketFrame textFrame) {
+                    parent.getWebsocketListener().onTextMessage(new WsChannel(ctx.channel()), textFrame);
+                } else if (frame instanceof BinaryWebSocketFrame binaryFrame) {
+                    parent.getWebsocketListener().onBinaryMessage(new WsChannel(ctx.channel()), binaryFrame);
+                } else if (frame instanceof PingWebSocketFrame pingFrame) {
+                    parent.getWebsocketListener().onPing(new WsChannel(ctx.channel()), pingFrame);
+                } else if (frame instanceof PongWebSocketFrame pongFrame) {
+                    parent.getWebsocketListener().onPong(new WsChannel(ctx.channel()), pongFrame);
+                } else if (frame instanceof CloseWebSocketFrame closeFrame) {
+                    CloseState closeState = ctx.channel().attr(CLOSESTATE_ATTRIBUTE).get();
 
-                if (closeState == CloseState.OPEN) {
-                    ctx.channel().attr(CLOSESTATE_ATTRIBUTE).set(CloseState.CLIENT_INIT);
+                    if (closeState == CloseState.OPEN) {
+                        ctx.channel().attr(CLOSESTATE_ATTRIBUTE).set(CloseState.CLIENT_INIT);
 
-                    ctx.writeAndFlush(new CloseWebSocketFrame(WebSocketCloseStatus.NORMAL_CLOSURE));
+                        ctx.writeAndFlush(new CloseWebSocketFrame(WebSocketCloseStatus.NORMAL_CLOSURE));
 
-                    ctx.channel().attr(CLOSESTATE_ATTRIBUTE).set(CloseState.CLOSED);
-                    ctx.close();
-                } else if (closeState == CloseState.SERVER_INIT) {
-                    ctx.channel().attr(CLOSESTATE_ATTRIBUTE).set(CloseState.CLOSED);
-                    ctx.close();
+                        ctx.channel().attr(CLOSESTATE_ATTRIBUTE).set(CloseState.CLOSED);
+                        ctx.close();
+                    } else if (closeState == CloseState.SERVER_INIT) {
+                        ctx.channel().attr(CLOSESTATE_ATTRIBUTE).set(CloseState.CLOSED);
+                        ctx.close();
 
-                    parent.getWebsocketListener().onClose(closeFrame);
-                } else {
-                    parent.getLogger().warn("[{}] Invalid close state during close frame receive, {}!", parent.getName(), closeState);
+                        parent.getWebsocketListener().onClose(closeFrame);
+                    } else {
+                        parent.getLogger().warn("[{}] Invalid close state during close frame receive, {}!", parent.getName(), closeState);
+                    }
                 }
+
+            } finally {
+                frame.release();
             }
         } else {
             parent.getLogger().warn("[{}] Unknown type passed to {}, {}!", parent.getName(), this.getClass().getSimpleName(), msg.getClass().getSimpleName());
