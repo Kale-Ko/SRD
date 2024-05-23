@@ -1,6 +1,7 @@
 package io.github.kale_ko.srd.common.http.server.netty;
 
 import io.github.kale_ko.srd.common.http.server.HttpServer;
+import io.github.kale_ko.srd.common.http.server.WsChannel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -64,6 +65,10 @@ public class WsUpgradeHandler extends ChannelInboundHandlerAdapter {
                                                     ctx.pipeline().addAfter("HttpResponseEncoder", "WebSocketFrameEncoder", new WebSocket13FrameEncoder(false));
                                                     ctx.pipeline().addAfter("HttpRequestDecoder", "WebSocketFrameDecoder", new WebSocket13FrameDecoder(WebSocketDecoderConfig.newBuilder().expectMaskedFrames(true).allowMaskMismatch(false).allowExtensions(false).closeOnProtocolViolation(true).build()));
                                                     ctx.pipeline().remove("HttpRequestDecoder");
+
+                                                    // TODO This feels hacky
+                                                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).addListener(future -> parent.getWebsocketListener().onOpen(new WsChannel(ctx.channel())));
+                                                    return;
                                                 } else {
                                                     parent.getListener().onError(parent, request, response, HttpResponseStatus.BAD_REQUEST, null);
                                                 }

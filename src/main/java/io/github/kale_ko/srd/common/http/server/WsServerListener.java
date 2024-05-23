@@ -20,6 +20,9 @@ public interface WsServerListener {
     public default void onPong(@NotNull WsChannel channel, @NotNull PongWebSocketFrame frame) {
     }
 
+    public default void onOpen(@NotNull WsChannel channel) {
+    }
+
     public default void onClose(@NotNull CloseWebSocketFrame frame) {
     }
 }
