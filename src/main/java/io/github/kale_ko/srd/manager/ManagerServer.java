@@ -16,7 +16,7 @@ public class ManagerServer {
 
     protected final @NotNull Logger logger;
 
-    protected @NotNull Config config;
+    protected final @NotNull Config config;
 
     protected final @NotNull Object statusLock = new Object();
     protected boolean running = false;
@@ -28,6 +28,14 @@ public class ManagerServer {
         this.logger = logger;
 
         this.config = config;
+    }
+
+    public @NotNull Logger getLogger() {
+        return this.logger;
+    }
+
+    public @NotNull Config getConfig() {
+        return this.config;
     }
 
     public @NonBlocking void start() {

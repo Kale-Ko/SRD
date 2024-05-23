@@ -148,17 +148,19 @@ public class ManagerMain {
             }
         }
 
-        if (https && (httpsCertificate == null || httpsPrivateKey == null)) {
-            logger.error("httpsCertificate and httpsPrivateKye must be provided when https is enabled");
-            System.exit(1);
-        }
+        if (https) {
+            if ((httpsCertificate == null || httpsPrivateKey == null)) {
+                logger.error("httpsCertificate and httpsPrivateKye must be provided when https is enabled");
+                System.exit(1);
+            }
 
-        if (!Files.exists(httpsCertificate)) {
-            logger.error("The passed httpsCertificate does not exist \"{}\"", httpsCertificate);
-            System.exit(1);
-        } else if (!Files.exists(httpsPrivateKey)) {
-            logger.error("The passed httpsPrivateKey does not exist \"{}\"", httpsPrivateKey);
-            System.exit(1);
+            if (!Files.exists(httpsCertificate)) {
+                logger.error("The passed httpsCertificate does not exist \"{}\"", httpsCertificate);
+                System.exit(1);
+            } else if (!Files.exists(httpsPrivateKey)) {
+                logger.error("The passed httpsPrivateKey does not exist \"{}\"", httpsPrivateKey);
+                System.exit(1);
+            }
         }
 
         ManagerServer.Config managerConfig = new ManagerServer.Config(hostname, httpPort, https, httpsPort, httpsCertificate, httpsPrivateKey);
