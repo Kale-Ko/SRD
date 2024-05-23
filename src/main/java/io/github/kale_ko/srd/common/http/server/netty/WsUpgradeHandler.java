@@ -62,12 +62,16 @@ public class WsUpgradeHandler extends ChannelInboundHandlerAdapter {
 
                                                     parent.getWebsocketListener().onHandshake(parent, request, response);
 
-                                                    ctx.pipeline().addAfter("HttpResponseEncoder", "WebSocketFrameEncoder", new WebSocket13FrameEncoder(false));
-                                                    ctx.pipeline().addAfter("HttpRequestDecoder", "WebSocketFrameDecoder", new WebSocket13FrameDecoder(WebSocketDecoderConfig.newBuilder().expectMaskedFrames(true).allowMaskMismatch(false).allowExtensions(false).closeOnProtocolViolation(true).build()));
-                                                    ctx.pipeline().remove("HttpRequestDecoder");
-
                                                     // TODO This feels hacky
-                                                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).addListener(future -> parent.getWebsocketListener().onOpen(new WsChannel(ctx.channel())));
+                                                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).addListener(future -> {
+                                                        ctx.pipeline().addAfter("HttpResponseEncoder", "WebSocketFrameEncoder", new WebSocket13FrameEncoder(false));
+                                                        ctx.pipeline().addAfter("HttpRequestDecoder", "WebSocketFrameDecoder", new WebSocket13FrameDecoder(WebSocketDecoderConfig.newBuilder().expectMaskedFrames(true).allowMaskMismatch(false).allowExtensions(false).closeOnProtocolViolation(true).build()));
+
+                                                        ctx.pipeline().remove("HttpRequestDecoder");
+                                                        ctx.pipeline().remove("HttpResponseEncoder");
+
+                                                        parent.getWebsocketListener().onOpen(new WsChannel(ctx.channel()));
+                                                    });
                                                     return;
                                                 } else {
                                                     parent.getListener().onError(parent, request, response, HttpResponseStatus.BAD_REQUEST, null);
