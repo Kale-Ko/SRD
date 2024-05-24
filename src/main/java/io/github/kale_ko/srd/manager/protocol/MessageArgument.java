@@ -1,5 +1,6 @@
 package io.github.kale_ko.srd.manager.protocol;
 
+import java.util.Arrays;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
@@ -130,5 +131,53 @@ public class MessageArgument {
 
     public UUID[] getUuidArrayValue() {
         return this.uuidArrayValue;
+    }
+
+    @Override
+    public String toString() {
+        String value;
+        switch (this.type) {
+            case BOOLEAN -> {
+                value = String.valueOf(this.booleanValue);
+            }
+            case BYTE -> {
+                value = String.valueOf(this.byteValue);
+            }
+            case SHORT -> {
+                value = String.valueOf(this.shortValue);
+            }
+            case INT -> {
+                value = String.valueOf(this.intValue);
+            }
+            case LONG -> {
+                value = String.valueOf(this.longValue);
+            }
+            case UUID -> {
+                value = String.valueOf(this.uuidValue);
+            }
+            case BOOLEAN_ARRAY -> {
+                value = Arrays.toString(this.booleanArrayValue);
+            }
+            case BYTE_ARRAY -> {
+                value = Arrays.toString(this.byteArrayValue);
+            }
+            case SHORT_ARRAY -> {
+                value = Arrays.toString(this.shortArrayValue);
+            }
+            case INT_ARRAY -> {
+                value = Arrays.toString(this.intArrayValue);
+            }
+            case LONG_ARRAY -> {
+                value = Arrays.toString(this.longArrayValue);
+            }
+            case UUID_ARRAY -> {
+                value = Arrays.toString(this.uuidArrayValue);
+            }
+            default -> {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        return this.getClass().getSimpleName() + "{type=" + this.type + ", value=" + value + "}";
     }
 }
