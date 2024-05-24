@@ -35,6 +35,11 @@ public class Message {
         return this.arguments;
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{type=" + this.type + ", arguments=" + this.arguments + "}";
+    }
+
     public static @Nullable Message read(@Nullable ByteBuf data) {
         data.retain();
 

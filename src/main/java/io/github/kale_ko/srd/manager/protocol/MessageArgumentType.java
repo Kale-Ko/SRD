@@ -39,4 +39,9 @@ public enum MessageArgumentType {
     public int getVariableSize() {
         return this.variableSize;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "#" + this.name() + "{size=" + this.size + ", variableSize=" + this.variableSize + '}';
+    }
 }

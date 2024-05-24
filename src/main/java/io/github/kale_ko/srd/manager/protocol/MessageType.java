@@ -32,6 +32,11 @@ public enum MessageType {
         return this.code;
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "#" + this.name() + "{code=" + this.code + ", arguments=" + this.arguments + "}";
+    }
+
     public @NotNull @Unmodifiable List<MessageArgumentType> getArguments() {
         return this.arguments;
     }
