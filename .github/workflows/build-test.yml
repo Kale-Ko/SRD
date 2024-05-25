@@ -1,4 +1,4 @@
-y7nname: Build Test
+name: Build Test
 
 on:
   push:
