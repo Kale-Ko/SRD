@@ -129,7 +129,7 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_000
             data[j] = image->data[i + 2];
             data[j + 1] = image->data[i + 1];
             data[j + 2] = image->data[i];
-            data[j + 3] = 255;
+            data[j + 3] = -127 /*255*/;
         }
         break;
     default:
@@ -140,7 +140,7 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_000
 
     jbyteArray dataObj = env->NewByteArray(dataSize);
     env->SetByteArrayRegion(dataObj, 0, dataSize, data);
-    delete data;
+    delete[] data;
 
     jclass captureClazz = env->FindClass("io/github/kale_ko/srd/capture/DesktopCapture$Capture");
     jobject captureObj = env->NewObject(captureClazz, getConstructorId(env, captureClazz, "<init>", "(II[B)V"), width, height, dataObj);

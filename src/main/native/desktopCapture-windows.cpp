@@ -41,7 +41,7 @@ struct GetScreensProcStruct {
     jclass screenClazz;
 };
 
-BOOL getScreensProc(HMONITOR hMonitor, HDC _hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+BOOL CALLBACK getScreensProc(HMONITOR hMonitor, HDC _hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
     GetScreensProcStruct* procStruct = (GetScreensProcStruct*)dwData;
 
     MONITORINFOEX monitorInfo;
@@ -79,8 +79,8 @@ JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCaptur
         EnumDisplayMonitors(NULL, NULL, getScreensProc, (LPARAM)&procStruct);
     }
 
-    jobjectArray screensArray = env->NewObjectArray(screens.size(), screenClazz, NULL);
-    for (int i = 0; i < screens.size(); i++) {
+    jobjectArray screensArray = env->NewObjectArray((signed int)screens.size(), screenClazz, NULL);
+    for (unsigned int i = 0; i < screens.size(); i++) {
         env->SetObjectArrayElement(screensArray, i, screens[i]);
     }
     env->DeleteLocalRef(screenClazz);
@@ -95,8 +95,6 @@ JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCaptur
 JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_00024Screen_n_1capture(JNIEnv* env, jobject self) {
     ScreenStruct* screenStruct = (ScreenStruct*)env->GetLongField(self, getFieldId(env, self, "handle", "J"));
 
-    jint x = env->GetIntField(self, getFieldId(env, self, "x", "I"));
-    jint y = env->GetIntField(self, getFieldId(env, self, "y", "I"));
     jint width = env->GetIntField(self, getFieldId(env, self, "width", "I"));
     jint height = env->GetIntField(self, getFieldId(env, self, "height", "I"));
 
@@ -127,15 +125,15 @@ JNIEXPORT jobject JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCapture_000
 
     jint dataSize = width * height * 4;
     jbyte* data = new jbyte[dataSize];
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             int srcIndex = ((height - 1 - y) * width + x) * 3;
             int destIndex = (y * width + x) * 4;
 
             data[destIndex] = bmpData[srcIndex + 2];
             data[destIndex + 1] = bmpData[srcIndex + 1];
             data[destIndex + 2] = bmpData[srcIndex];
-            data[destIndex + 3] = 255;
+            data[destIndex + 3] = -127 /*255*/;
         }
     }
     delete bmpData;
