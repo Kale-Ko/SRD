@@ -294,7 +294,7 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        commandLine getvcvarsall(), "x64_x86", "&&", "cl", "/nologo", "/utf-8", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64", "&&", "cl", "/nologo", "/utf-8", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
