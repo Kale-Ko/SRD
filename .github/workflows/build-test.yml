@@ -24,6 +24,11 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Setup C++
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc
+
       - name: Setup Dependencies
         run: |
           sudo dpkg --add-architecture amd64
@@ -69,6 +74,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+
+      - name: Setup C++
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: msvc
+          vcvarsall: true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3

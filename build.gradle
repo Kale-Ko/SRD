@@ -148,6 +148,19 @@ static boolean isExecutable(String name) {
     return getExecutable(name) != null
 }
 
+static String getvcvarsall() {
+    if (Files.exists(Path.of("C:\\Program Files\\Microsoft Visual Studio\\"))) {
+        println(Files.list(Path.of("C:\\Program Files\\\\Microsoft Visual Studio")).toList())
+    } else if (Files.exists(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\"))) {
+        println(Files.list(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\")).toList())
+    } else {
+        logger.log(LogLevel.ERROR, "No Visual Studio installation!!")
+        return "check console"
+    }
+
+    return "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+}
+
 if (isLinux()) {
     tasks.register("make-linux-x86_64", Exec) {
         dependsOn tasks.compileJava
@@ -288,7 +301,7 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -305,7 +318,7 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64_x86", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_x86", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -322,7 +335,7 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64_arm64", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_arm64", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -339,7 +352,7 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64_arm", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_arm", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -411,6 +424,8 @@ tasks.register("make") {
 }
 
 build {
+    finalizedBy tasks.make
+
     finalizedBy tasks.clientJar
     finalizedBy tasks.serverJar
     finalizedBy tasks.managerJar
