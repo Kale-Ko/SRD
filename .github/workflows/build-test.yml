@@ -26,8 +26,14 @@ jobs:
 
       - name: Setup Dependencies
         run: |
+          sudo dpkg --add-architecture amd64
+          sudo dpkg --add-architecture i386
+          sudo dpkg --add-architecture armel
+          sudo dpkg --add-architecture armhf
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update -y
           sudo apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu gcc-i686-linux-gnu g++-i686-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu gcc-arm-linux-gnueabi g++-arm-linux-gnueabi gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-          sudo apt-get install -y apt install libx11-dev:amd64 libxrandr-dev:amd64 libx11-dev:i386 libxrandr-dev:i386 libx11-dev:arm64 libxrandr-dev:arm64 libx11-dev:armel libxrandr-dev:armel libx11-dev:armhf libxrandr-dev:armhf
+          sudo apt-get install -y libx11-dev:amd64 libxrandr-dev:amd64 libx11-dev:i386 libxrandr-dev:i386 libx11-dev:arm64 libxrandr-dev:arm64 libx11-dev:armel libxrandr-dev:armel libx11-dev:armhf libxrandr-dev:armhf
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
