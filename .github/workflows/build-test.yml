@@ -1,4 +1,4 @@
-name: Build Test
+y7nname: Build Test
 
 on:
   push:
@@ -7,7 +7,9 @@ on:
     branches: [ "*" ]
 
 jobs:
-  build:
+  makeLinux:
+    name: "Make Natives - Linux"
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -16,34 +18,92 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Download Custom JDK
-        working-directory: ${{ runner.temp }}
-        run: |
-          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=linux&architecture=x64&image_type=jdk" -o javaLinux.json
-          curl -sL "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=x64&image_type=jdk" -o javaWindows.json
-          javaLinuxUrl=$(cat javaLinux.json | jq --raw-output ".[0].binary.package.link")
-          javaWindowsVersion=$(cat javaWindows.json | jq --raw-output ".[0].release_name")
-          javaWindowsUrl=$(cat javaWindows.json | jq --raw-output ".[0].binary.package.link")
-          curl -sL $javaLinuxUrl -o javaLinux.tar.gz
-          curl -sL $javaWindowsUrl -o javaWindows.zip
-          mkdir -p java/linux/ && tar -xf javaLinux.tar.gz -C java/linux --strip-components 1
-          mkdir -p java/windows/ && ln --symbolic . java/windows/$javaWindowsVersion && unzip -qx javaWindows.zip -d java/windows/
-          cp -r java/windows/include/win32 java/linux/include/win32
-          cd java/ && tar -cf ${{ runner.temp }}/javaCombined.tar linux/ && gzip ${{ runner.temp }}/javaCombined.tar && cd ../
-
-      - name: Setup Custom JDK
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/javaCombined.tar.gz
+          distribution: temurin
           java-version: 21
-          architecture: x64
 
       - name: Setup Dependencies
-        run: sudo apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu g++-mingw-w64-x86-64-win32 g++-mingw-w64-x86-64-win32 libx11-dev libxrandr-dev
+        run: |
+          sudo apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu gcc-i686-linux-gnu g++-i686-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu gcc-arm-linux-gnueabi g++-arm-linux-gnueabi gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          sudo apt-get install -y apt install libx11-dev:amd64 libxrandr-dev:amd64 libx11-dev:i386 libxrandr-dev:i386 libx11-dev:arm64 libxrandr-dev:arm64 libx11-dev:armel libxrandr-dev:armel libx11-dev:armhf libxrandr-dev:armhf
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Compile Natives
+        run: ./gradlew make
+
+      - name: Upload Natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: "linux-natives"
+          path: |
+            build/natives/*.so
+  makeWindows:
+    name: "Make Natives - Windows"
+
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Compile Natives
+        run: ./gradlew make
+
+      - name: Upload Natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: "windows-natives"
+          path: |
+            build/natives/*.dll
+  build:
+    name: "Build"
+    needs: [ makeLinux, makeWindows ]
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Download Natives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-natives"
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Extract Natives
+        run: |
+          ls artifacts/
+          mkdir -p build/natives/
+          cp artifacts/*/* build/natives/
+          ls build/natives/
 
       - name: Build Artifacts
         run: ./gradlew build
