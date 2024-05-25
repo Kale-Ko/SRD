@@ -153,7 +153,7 @@ static String getvcvarsall() {
 
     for (Path directory : directories) {
         if (Files.exists(directory)) {
-            List<Path> installations = Files.list(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\")).toList()
+            List<Path> installations = Files.list(directory).toList()
 
             println(installations)
 
