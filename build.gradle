@@ -69,7 +69,7 @@ tasks.register("clientJar", Jar) {
 }
 
 tasks.register("serverJar", Jar) {
-    dependsOn tasks.findNatives
+    dependsOn tasks.make
 
     archiveClassifier = "server"
     manifest {
@@ -87,13 +87,11 @@ tasks.register("serverJar", Jar) {
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.output)
-    from(tasks.findNatives.outputs.files)
+    from(tasks.make.outputs.files)
     from(configurations.runtimeClasspath)
 }
 
 tasks.register("managerJar", Jar) {
-    dependsOn tasks.findNatives
-
     archiveClassifier = "manager"
     manifest {
         attributes "Name": "io/github/kale_ko/srd/",
@@ -111,15 +109,6 @@ tasks.register("managerJar", Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.output)
     from(configurations.runtimeClasspath)
-}
-
-tasks.register("findNatives") {
-    dependsOn tasks.make
-
-    List<Path> files = Files.list(Path.of("build/natives/")).toList()
-
-    inputs.files(files)
-    outputs.files(files)
 }
 
 import java.nio.file.Files
@@ -359,66 +348,66 @@ if (isWindows()) {
 }
 
 tasks.register("make") {
-    int registered = 0
+    List<Task> taskList = new ArrayList<>()
+    List<Path> outputList = new ArrayList<>()
 
     if (isLinux()) {
         if (isExecutable("x86_64-linux-gnu-g++")) {
-            dependsOn tasks["make-linux-x86_64"]
-            registered++
+            taskList.add(tasks["make-linux-x86_64"])
         } else {
             logger.log(LogLevel.WARN, "Missing compiler for x86_64 'g++-x86-64-linux-gnu'")
         }
         if (isExecutable("i686-linux-gnu-g++")) {
-            dependsOn tasks["make-linux-x86"]
-            registered++
+            taskList.add(tasks["make-linux-x86"])
         } else {
             logger.log(LogLevel.WARN, "Missing compiler for x86 'g++-i686-linux-gnu'")
         }
         if (isExecutable("aarch64-linux-gnu-g++")) {
-            dependsOn tasks["make-linux-arm64"]
-            registered++
+            taskList.add(tasks["make-linux-arm64"])
         } else {
             logger.log(LogLevel.WARN, "Missing compiler for arm64 'g++-aarch64-linux-gnu'")
         }
         if (isExecutable("arm-linux-gnueabi-g++")) {
-            dependsOn tasks["make-linux-arm"]
-            registered++
+            taskList.add(tasks["make-linux-arm"])
         } else {
             logger.log(LogLevel.WARN, "Missing compiler for arm 'g++-arm-linux-gnueabi'")
         }
         if (isExecutable("arm-linux-gnueabihf-g++")) {
-            dependsOn tasks["make-linux-armhf"]
-            registered++
+            taskList.add(tasks["make-linux-armhf"])
         } else {
             logger.log(LogLevel.WARN, "Missing compiler for armhf 'g++-arm-linux-gnueabihf'")
         }
 
         if (isExecutable("x86_64-w64-mingw32-g++-win32")) {
-            dependsOn tasks["make-windows-mingw32-x86_64"]
-            registered++
+            taskList.add(tasks["make-windows-mingw32-x86_64"])
         }
         if (isExecutable("i686-w64-mingw32-g++-win32")) {
-            dependsOn tasks["make-windows-mingw32-x86"]
-            registered++
+            taskList.add(tasks["make-windows-mingw32-x86"])
         }
         if (isExecutable("x86_64-w64-mingw32-g++-win32") || isExecutable("i686-w64-mingw32-g++-win32")) {
-            doFirst {
-                logger.log(LogLevel.WARN, "Building windows on linux should only be used for testing purposes!")
-                logger.log(LogLevel.WARN, "Do note it also does not support arm!")
-            }
+            logger.log(LogLevel.WARN, "Building windows on linux should only be used for testing purposes!")
+            logger.log(LogLevel.WARN, "Do note it also does not support arm!")
         }
     }
     if (isWindows()) {
-        dependsOn tasks["make-windows-x86_64"]
-        dependsOn tasks["make-windows-x86"]
-        //        dependsOn tasks["make-windows-arm64"]
-        //        dependsOn tasks["make-windows-arm"]
-        registered += 4
+        taskList.add(tasks["make-windows-x86_64"])
+        taskList.add(tasks["make-windows-x86"])
+        //        taskList.add(tasks["make-windows-arm64"])
+        //        taskList.add(tasks["make-windows-arm"])
     }
 
-    if (registered == 0) {
+    if (taskList.isEmpty()) {
         logger.log(LogLevel.ERROR, "No compilers where registered! Check logs")
     }
+
+    for (Task task : taskList) {
+        dependsOn task
+        outputList.addAll(task.outputs.files.collect {
+            it.toPath()
+        })
+    }
+
+    outputs.files(outputList)
 }
 
 build {
