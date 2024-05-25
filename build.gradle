@@ -421,8 +421,8 @@ tasks.register("make") {
         if (isWindows()) {
             taskList.add(tasks["make-windows-x86_64"])
             taskList.add(tasks["make-windows-x86"])
-            //        taskList.add(tasks["make-windows-arm64"])
-            //        taskList.add(tasks["make-windows-arm"])
+            taskList.add(tasks["make-windows-arm64"])
+            taskList.add(tasks["make-windows-arm"])
         }
 
         if (taskList.isEmpty()) {
