@@ -237,30 +237,12 @@ if (isLinux()) {
             Files.createDirectories(outPath)
         }
 
-        executable "arm-linux-gnueabi-g++"
-        args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux-arm.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/arm-linux-gnueabi/", "-l", "X11", "-l", "Xrandr"
+        executable "arm-linux-gnueabihf-g++"
+        args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux-arm.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/arm-linux-gnueabihf/", "-l", "X11", "-l", "Xrandr"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
         outputs.files([outPath.resolve("libDesktopCapture-linux-arm.so")])
-    }
-
-    tasks.register("make-linux-armhf", Exec) {
-        dependsOn tasks.compileJava
-
-        Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/")
-        Path outPath = Path.of("build/natives/")
-
-        doFirst {
-            Files.createDirectories(outPath)
-        }
-
-        executable "arm-linux-gnueabihf-g++"
-        args "src/main/native/desktopCapture-linux.cpp", "-o", outPath.resolve("libDesktopCapture-linux-armhf.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/arm-linux-gnueabihf/", "-l", "X11", "-l", "Xrandr"
-        workingDir rootDir
-
-        inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
-        outputs.files([outPath.resolve("libDesktopCapture-linux-armhf.so")])
     }
 
     tasks.register("make-windows-mingw32-x86_64", Exec) {
@@ -396,15 +378,10 @@ tasks.register("make") {
             } else {
                 logger.log(LogLevel.WARN, "Missing compiler for arm64 'g++-aarch64-linux-gnu'")
             }
-            if (isExecutable("arm-linux-gnueabi-g++")) {
+            if (isExecutable("arm-linux-gnueabihf-g++")) {
                 taskList.add(tasks["make-linux-arm"])
             } else {
-                logger.log(LogLevel.WARN, "Missing compiler for arm 'g++-arm-linux-gnueabi'")
-            }
-            if (isExecutable("arm-linux-gnueabihf-g++")) {
-                taskList.add(tasks["make-linux-armhf"])
-            } else {
-                logger.log(LogLevel.WARN, "Missing compiler for armhf 'g++-arm-linux-gnueabihf'")
+                logger.log(LogLevel.WARN, "Missing compiler for arm 'g++-arm-linux-gnueabihf'")
             }
 
             if (isExecutable("x86_64-w64-mingw32-g++-win32")) {
