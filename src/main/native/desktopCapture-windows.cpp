@@ -75,7 +75,11 @@ JNIEXPORT jobjectArray JNICALL Java_io_github_kale_1ko_srd_capture_DesktopCaptur
     jclass screenClazz = env->FindClass("io/github/kale_ko/srd/capture/DesktopCapture$Screen");
 
     {
-        GetScreensProcStruct procStruct = { .screens = &screens, .env = env, .desktop = self, .screenClazz = screenClazz };
+        GetScreensProcStruct procStruct;
+        procStruct.screens = &screens;
+        procStruct.env = env;
+        procStruct.desktop = self;
+        procStruct.screenClazz = screenClazz;
         EnumDisplayMonitors(NULL, NULL, getScreensProc, (LPARAM)&procStruct);
     }
 
