@@ -38,7 +38,7 @@ jobs:
           echo "deb [arch=arm64,armhf] http://azure.ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc)-updates main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-ports-updates.list
           echo "deb [arch=arm64,armhf] http://azure.ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc)-security main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-ports-security.list
           sudo apt-get update -y
-          sudo apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu gcc-i686-linux-gnu g++-i686-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf cpp-x86-64-linux-gnu cpp-i686-linux-gnu cpp-aarch64-linux-gnu cpp-arm-linux-gnueabihf
+          sudo apt-get install -y gcc-x86-64-linux-gnu:amd64 g++-x86-64-linux-gnu:amd64 gcc-i686-linux-gnu:amd64 g++-i686-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 g++-aarch64-linux-gnu:amd64 gcc-arm-linux-gnueabihf:amd64 g++-arm-linux-gnueabihf:amd64
           sudo apt-get install -y libx11-dev:amd64 libxrandr-dev:amd64 libx11-dev:i386 libxrandr-dev:i386 libx11-dev:arm64 libxrandr-dev:arm64 libx11-dev:armel libxrandr-dev:armel libx11-dev:armhf libxrandr-dev:armhf
 
       - name: Setup Gradle
