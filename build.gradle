@@ -113,8 +113,13 @@ tasks.register("managerJar", Jar) {
     from(configurations.runtimeClasspath)
 }
 
-tasks.register("findNatives", Copy) {
+tasks.register("findNatives") {
+    dependsOn tasks.make
 
+    List<Path> files = Files.list(Path.of("build/natives/")).toList()
+
+    inputs.files(files)
+    outputs.files(files)
 }
 
 import java.nio.file.Files
@@ -152,18 +157,6 @@ static Path getExecutable(String name) {
 
 static boolean isExecutable(String name) {
     return getExecutable(name) != null
-}
-
-static Path getClPath() {
-    return getExecutable("cl").getParent().resolve("cl.exe")
-}
-
-static Path getClX86Path() {
-    return getClPath().getParent().getParent().resolve("x86\\cl.exe")
-}
-
-static Path getClX64Path() {
-    return getClPath().getParent().getParent().resolve("x64\\cl.exe")
 }
 
 if (isLinux()) {
@@ -306,8 +299,7 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        executable getClX64Path()
-        args "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString()
+        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -324,12 +316,45 @@ if (isWindows()) {
             Files.createDirectories(outPath)
         }
 
-        executable getClX86Path()
-        args "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString()
+        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64_x86", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir rootDir
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
         outputs.files([outPath.resolve("libDesktopCapture-windows-x86.dll")])
+    }
+
+    tasks.register("make-windows-arm64", Exec) {
+        dependsOn tasks.compileJava
+
+        Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/")
+        Path outPath = Path.of("build/natives/")
+
+        doFirst {
+            Files.createDirectories(outPath)
+        }
+
+        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64_arm64", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        workingDir rootDir
+
+        inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
+        outputs.files([outPath.resolve("libDesktopCapture-windows-arm64.dll")])
+    }
+
+    tasks.register("make-windows-arm", Exec) {
+        dependsOn tasks.compileJava
+
+        Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/")
+        Path outPath = Path.of("build/natives/")
+
+        doFirst {
+            Files.createDirectories(outPath)
+        }
+
+        commandLine "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "x64_arm", "&&", "cl", "/nologo", "/utf-8", "src/main/native/desktopCapture-windows.cpp", "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        workingDir rootDir
+
+        inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
+        outputs.files([outPath.resolve("libDesktopCapture-windows-arm.dll")])
     }
 }
 
@@ -384,13 +409,11 @@ tasks.register("make") {
         }
     }
     if (isWindows()) {
-        if (isExecutable("cl")) {
-            dependsOn tasks["make-windows-x86_64"]
-            dependsOn tasks["make-windows-x86"]
-            registered += 2
-        } else {
-            logger.log(LogLevel.ERROR, "Missing windows compiler 'cl'")
-        }
+        dependsOn tasks["make-windows-x86_64"]
+        dependsOn tasks["make-windows-x86"]
+        //        dependsOn tasks["make-windows-arm64"]
+        //        dependsOn tasks["make-windows-arm"]
+        registered += 4
     }
 
     if (registered == 0) {
