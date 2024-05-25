@@ -149,25 +149,29 @@ static boolean isExecutable(String name) {
 }
 
 static String getvcvarsall() {
-    List<Path> directories = List.of(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\"), Path.of("C:\\Program Files\\Microsoft Visual Studio\\"))
+    List<Path> directories = List.of(Path.of("C:\\Program Files\\Microsoft Visual Studio\\"), Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\"))
 
     for (Path directory : directories) {
         if (Files.exists(directory)) {
             List<Path> installations = Files.list(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\")).toList()
 
+            println(installations)
+
             for (Path installation : installations) {
                 List<Path> versions = Files.list(installation).toList()
 
+                println(versions)
+
                 for (Path version : versions) {
                     Path vcvarsallPath = version.resolve("VC\\Auxiliary\\Build\\vcvarsall.bat")
+
+                    println(vcvarsallPath)
 
                     if (Files.exists(vcvarsallPath)) {
                         return vcvarsallPath.toString()
                     }
                 }
             }
-        } else {
-            throw new RuntimeException("No Visual Studio installation!!")
         }
     }
 
