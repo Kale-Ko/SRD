@@ -425,7 +425,9 @@ tasks.register("make") {
     }
 
     for (Task task : taskList) {
-        dependsOn task
+        if (System.getenv("GRADLE_NO_MAKE") == null) {
+            dependsOn task
+        }
         outputList.addAll(task.outputs.files.collect {
             it.toPath()
         })
@@ -435,8 +437,6 @@ tasks.register("make") {
 }
 
 build {
-    finalizedBy tasks.make
-
     finalizedBy tasks.clientJar
     finalizedBy tasks.serverJar
     finalizedBy tasks.managerJar
