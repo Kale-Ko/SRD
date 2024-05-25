@@ -176,14 +176,15 @@ if (isLinux()) {
     tasks.register("make-linux-x86_64", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine "x86_64-linux-gnu-g++", Path.of("src/main/native/desktopCapture-linux.cpp").toAbsolutePath().toString(), "-o", outPath.resolve("libDesktopCapture-linux-x86_64.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/x86_64-linux-gnu/", "-l", "X11", "-l", "Xrandr"
+        commandLine "x86_64-linux-gnu-g++", rootPath.resolve("src/main/native/desktopCapture-linux.cpp").toString(), "-o", outPath.resolve("libDesktopCapture-linux-x86_64.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/x86_64-linux-gnu/", "-l", "X11", "-l", "Xrandr"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -193,14 +194,15 @@ if (isLinux()) {
     tasks.register("make-linux-x86", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine "i686-linux-gnu-g++", Path.of("src/main/native/desktopCapture-linux.cpp").toAbsolutePath().toString(), "-o", outPath.resolve("libDesktopCapture-linux-x86.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/i686-linux-gnu/", "-l", "X11", "-l", "Xrandr"
+        commandLine "i686-linux-gnu-g++", rootPath.resolve("src/main/native/desktopCapture-linux.cpp").toString(), "-o", outPath.resolve("libDesktopCapture-linux-x86.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/i686-linux-gnu/", "-l", "X11", "-l", "Xrandr"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -210,14 +212,15 @@ if (isLinux()) {
     tasks.register("make-linux-arm64", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine "aarch64-linux-gnu-g++", Path.of("src/main/native/desktopCapture-linux.cpp").toAbsolutePath().toString(), "-o", outPath.resolve("libDesktopCapture-linux-arm64.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/aarch64-linux-gnu/", "-l", "X11", "-l", "Xrandr"
+        commandLine "aarch64-linux-gnu-g++", rootPath.resolve("src/main/native/desktopCapture-linux.cpp").toString(), "-o", outPath.resolve("libDesktopCapture-linux-arm64.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/aarch64-linux-gnu/", "-l", "X11", "-l", "Xrandr"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -227,14 +230,15 @@ if (isLinux()) {
     tasks.register("make-linux-arm", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine "arm-linux-gnueabihf-g++", Path.of("src/main/native/desktopCapture-linux.cpp").toAbsolutePath().toString(), "-o", outPath.resolve("libDesktopCapture-linux-arm.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/arm-linux-gnueabihf/", "-l", "X11", "-l", "Xrandr"
+        commandLine "arm-linux-gnueabihf-g++", rootPath.resolve("src/main/native/desktopCapture-linux.cpp").toString(), "-o", outPath.resolve("libDesktopCapture-linux-arm.so").toString(), "-std=c++20", "-O2", "-shared", "-s", "-I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("linux/").toString(), "-L", "/usr/lib/arm-linux-gnueabihf/", "-l", "X11", "-l", "Xrandr"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-linux.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -244,14 +248,15 @@ if (isLinux()) {
     tasks.register("make-windows-mingw32-x86_64", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine "x86_64-w64-mingw32-g++-win32", Path.of("src/main/native/desktopCapture-windows.cpp").toAbsolutePath().toString(), "-o", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-s", "-I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/", "-l", "gdi32"
+        commandLine "x86_64-w64-mingw32-g++-win32", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "-o", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-s", "-I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/x86_64-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/x86_64-w64-mingw32/lib/", "-l", "gdi32"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -261,14 +266,15 @@ if (isLinux()) {
     tasks.register("make-windows-mingw32-x86", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine "i686-w64-mingw32-g++-win32", Path.of("src/main/native/desktopCapture-windows.cpp").toAbsolutePath().toString(), "-o", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-s", "-I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/i686-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/i686-w64-mingw32/lib/", "-l", "gdi32"
+        commandLine "i686-w64-mingw32-g++-win32", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "-o", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "-std=c++20", "-O2", "-static", "-shared", "-s", "-I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "-I", "/usr/i686-w64-mingw32/include/", "-I", includeDir.toString(), "-I", includeDir.resolve("win32/").toString(), "-L", "/usr/i686-w64-mingw32/lib/", "-l", "gdi32"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -280,14 +286,15 @@ if (isWindows()) {
     tasks.register("make-windows-x86_64", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine getvcvarsall(), "x64_x86", "&&", "cl", "/nologo", "/utf-8", Path.of("src/main/native/desktopCapture-windows.cpp").toAbsolutePath().toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_x86", "&&", "cl", "/nologo", "/utf-8", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86_64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -297,14 +304,15 @@ if (isWindows()) {
     tasks.register("make-windows-x86", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine getvcvarsall(), "x64_x86", "&&", "cl", "/nologo", "/utf-8", Path.of("src/main/native/desktopCapture-windows.cpp").toAbsolutePath().toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_x86", "&&", "cl", "/nologo", "/utf-8", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-x86.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -314,14 +322,15 @@ if (isWindows()) {
     tasks.register("make-windows-arm64", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine getvcvarsall(), "x64_arm64", "&&", "cl", "/nologo", "/utf-8", Path.of("src/main/native/desktopCapture-windows.cpp").toAbsolutePath().toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_arm64", "&&", "cl", "/nologo", "/utf-8", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm64.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
@@ -331,14 +340,15 @@ if (isWindows()) {
     tasks.register("make-windows-arm", Exec) {
         dependsOn tasks.compileJava
 
+        Path rootPath = rootDir.toPath().toAbsolutePath()
         Path includeDir = Path.of(System.getProperty("java.home")).resolve("include/").toAbsolutePath()
-        Path outPath = Path.of("build/natives/").toAbsolutePath()
+        Path outPath = rootPath.resolve("build/natives/")
 
         doFirst {
             Files.createDirectories(outPath)
         }
 
-        commandLine getvcvarsall(), "x64_arm", "&&", "cl", "/nologo", "/utf-8", Path.of("src/main/native/desktopCapture-windows.cpp").toAbsolutePath().toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootDir.toPath().toAbsolutePath().resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
+        commandLine getvcvarsall(), "x64_arm", "&&", "cl", "/nologo", "/utf-8", rootPath.resolve("src/main/native/desktopCapture-windows.cpp").toString(), "kernel32.lib", "user32.lib", "gdi32.lib", "/Fe:", outPath.resolve("libDesktopCapture-windows-arm.dll").toString(), "/std:c++20", "/EHsc", "/W4", "/wd4100", "/WX", "/O2", "/LD", "/I", rootPath.resolve("build/generated/sources/headers/java/main").toString(), "/I", includeDir.toString(), "/I", includeDir.resolve("win32/").toString(), "/link", "/WX", "/subsystem:console", "/debug:none"
         workingDir outPath
 
         inputs.files(["src/main/native/desktopCapture-windows.cpp", "src/main/native/desktopCapture-common.cpp"])
