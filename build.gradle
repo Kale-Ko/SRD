@@ -149,16 +149,29 @@ static boolean isExecutable(String name) {
 }
 
 static String getvcvarsall() {
-    if (Files.exists(Path.of("C:\\Program Files\\Microsoft Visual Studio\\"))) {
-        println(Files.list(Path.of("C:\\Program Files\\\\Microsoft Visual Studio")).toList())
-    } else if (Files.exists(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\"))) {
-        println(Files.list(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\")).toList())
-    } else {
-        logger.log(LogLevel.ERROR, "No Visual Studio installation!!")
-        return "check console"
+    List<Path> directories = List.of(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\"), Path.of("C:\\Program Files\\Microsoft Visual Studio\\"))
+
+    for (Path directory : directories) {
+        if (Files.exists(directory)) {
+            List<Path> installations = Files.list(Path.of("C:\\Program Files (x86)\\Microsoft Visual Studio\\")).toList()
+
+            for (Path installation : installations) {
+                List<Path> versions = Files.list(installation).toList()
+
+                for (Path version : versions) {
+                    Path vcvarsallPath = version.resolve("VC\\Auxiliary\\Build\\vcvarsall.bat")
+
+                    if (Files.exist(vcvarsallPath)) {
+                        return vcvarsallPath.toString()
+                    }
+                }
+            }
+        } else {
+            throw new RuntimeException("No Visual Studio installation!!")
+        }
     }
 
-    return "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+    throw new RuntimeException("No vsvarsall could be found!")
 }
 
 if (isLinux()) {
