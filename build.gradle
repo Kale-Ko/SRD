@@ -161,7 +161,7 @@ static String getvcvarsall() {
                 for (Path version : versions) {
                     Path vcvarsallPath = version.resolve("VC\\Auxiliary\\Build\\vcvarsall.bat")
 
-                    if (Files.exist(vcvarsallPath)) {
+                    if (Files.exists(vcvarsallPath)) {
                         return vcvarsallPath.toString()
                     }
                 }
