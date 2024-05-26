@@ -7,8 +7,34 @@ on:
     branches: [ "*" ]
 
 jobs:
+  testBuild:
+    name: "Test Build"
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Test Build
+        run: ./gradlew compileJava
+        env:
+          GRADLE_NO_MAKE: true
+
   makeLinux:
     name: "Make Natives - Linux"
+    needs: [ testBuild ]
 
     runs-on: ubuntu-latest
     permissions:
@@ -58,8 +84,10 @@ jobs:
           name: "linux-natives"
           path: |
             build/natives/*.so
+
   makeWindows:
     name: "Make Natives - Windows"
+    needs: [ testBuild ]
 
     runs-on: windows-latest
     permissions:
@@ -93,9 +121,10 @@ jobs:
           name: "windows-natives"
           path: |
             build/natives/*.dll
+
   build:
     name: "Build"
-    needs: [ makeLinux, makeWindows ]
+    needs: [ testBuild, makeLinux, makeWindows ]
 
     runs-on: ubuntu-latest
     permissions:

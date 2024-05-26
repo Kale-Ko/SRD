@@ -359,8 +359,11 @@ if (isWindows()) {
 tasks.register("make") {
     if (System.getenv("GRADLE_NO_MAKE") != null) {
         List<Path> outputList = new ArrayList<>()
-        outputList.addAll(Files.list(Path.of("build/natives/")).toList())
-        outputs.files(outputList)
+        Path nativesPath = Path.of("build/natives/")
+        if (Files.exists(nativesPath)) {
+            outputList.addAll(Files.list(nativesPath).toList())
+            outputs.files(outputList)
+        }
     } else {
         List<Task> taskList = new ArrayList<>()
         List<Path> outputList = new ArrayList<>()
