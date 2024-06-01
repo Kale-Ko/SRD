@@ -41,16 +41,16 @@ public class ShadedClassLoader extends ClassLoader {
             JarEntry jarEntry;
             while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
                 if (!jarEntry.isDirectory()) {
-                    Path jar = tempDir.resolve(parentJar.getFileName()).resolve(jarEntry.getName());
-                    if (!Files.exists(jar.getParent())) {
-                        Files.createDirectories(jar.getParent());
+                    Path file = tempDir.resolve(parentJar.getFileName()).resolve(jarEntry.getName());
+                    if (!Files.exists(file.getParent())) {
+                        Files.createDirectories(file.getParent());
                     }
 
                     if (jarEntry.getName().endsWith(".jar")) {
-                        jars.add(jar);
+                        jars.add(file);
                     }
 
-                    try (OutputStream fileOutputStream = Files.newOutputStream(jar)) {
+                    try (OutputStream fileOutputStream = Files.newOutputStream(file)) {
                         int read;
                         byte[] buf = new byte[4096];
                         while ((read = jarInputStream.read(buf)) != -1) {
@@ -66,7 +66,7 @@ public class ShadedClassLoader extends ClassLoader {
                     if (!this.extractedResourceCatalog.containsKey(jarEntry.getName())) {
                         this.extractedResourceCatalog.put(jarEntry.getName(), new ArrayList<>());
                     }
-                    this.extractedResourceCatalog.get(jarEntry.getName()).add(jar);
+                    this.extractedResourceCatalog.get(jarEntry.getName()).add(file);
                 }
             }
         }
