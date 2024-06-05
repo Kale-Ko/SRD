@@ -6,6 +6,16 @@ SRD is a WIP remote desktop suite written in Java with a custom C++ screen captu
 
 ### Required dependencies
 
+#### Debian/Ubuntu
+
+Compiler:
+`apt install gcc g++`
+
+Libraries:
+`apt install libx11-dev`
+
+### Optional dependencies
+
 #### Debian
 
 Compiler:
@@ -22,7 +32,7 @@ Windows Compiler:
 #### Ubuntu
 
 Ubuntu is the same as Debian except you need to add the ports repository.\
-You may also need to manually specify `[arch=amd64,i386]` for the default repositories
+You may also need to manually specify `[arch=amd64,i386]` for your default repositories
 
 `echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc) main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-ports.list`
 
