@@ -34,7 +34,9 @@ Windows Compiler:
 Ubuntu is the same as Debian except you need to add the ports repository.\
 You may also need to manually specify `[arch=amd64,i386]` for your default repositories
 
-`echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc) main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-ports.list`
+`( echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc) main restricted universe multiverse" ; echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc)-updates main restricted universe multiverse" ; echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ $(lsb_release -sc)-security main restricted universe multiverse" ) | sudo tee /etc/apt/sources.list.d/ubuntu-ports.list`
+
+`( echo "deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted universe multiverse"; echo "deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-updates main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-updates.list ; echo "deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-security main restricted universe multiverse" ) | sudo tee /etc/apt/sources.list.d/ubuntu.list`
 
 ### Building
 
